@@ -18,7 +18,7 @@ from pu_models import RealPUResNet1D   # 你也可以改成从 build_real_pu_res
 
 
 def set_seed(seed: int):
-    """为每次 run 固定随机种子，保证可复现"""
+    """为每次 run 固定随机种子，保证可复现（当前版本中不再使用）。"""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -30,7 +30,7 @@ def set_seed(seed: int):
 
 
 def load_friedman():
-    """Friedman Synthetic: Train/Val/Test = 70/15/15"""
+    """Friedman Synthetic: Train/Val/Test = 70/15/15（划分固定）"""
     X, y = make_friedman1(
         n_samples=10000,
         n_features=10,
@@ -48,7 +48,7 @@ def load_friedman():
 
 
 def load_concrete():
-    """Concrete Strength: Train/Val/Test = 60/20/20"""
+    """Concrete Strength: Train/Val/Test = 60/20/20（划分固定）"""
     df = pd.read_excel(
         "./data/concrete+compressive+strength/Concrete_Data.xls"
     )
@@ -65,7 +65,7 @@ def load_concrete():
 
 
 def load_california():
-    """California Housing: Train/Val/Test = 80/10/10"""
+    """California Housing: Train/Val/Test = 80/10/10（划分固定）"""
     data = fetch_california_housing()
     X, y = data.data, data.target
 
@@ -158,7 +158,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="friedman",
+        default="california",
         choices=["friedman", "concrete", "california"],
         help="选择数据集"
     )
@@ -184,7 +184,7 @@ def main():
 
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # 1. 加载 & 划分数据（只做一次，每个 run 共用同一划分）
+    # 1. 加载 & 划分数据（只做一次，每个 run 共用同一划分；random_state 固定）
     if args.dataset == "friedman":
         X_train, X_val, X_test, y_train, y_val, y_test = load_friedman()
     elif args.dataset == "concrete":
@@ -213,15 +213,13 @@ def main():
 
     all_test_losses = []
 
-    # 🔁 多次训练（不同随机种子）
+    # 多次训练（不同随机种子）
     for run in range(args.runs):
-        seed = run  # 你也可以用别的种子策略
-        set_seed(seed)
-        print(f"\n==== Run {run+1}/{args.runs}, seed={seed}, model={args.model}, dataset={args.dataset} ====")
+        print(f"\n==== Run {run + 1}/{args.runs}, model={args.model}, dataset={args.dataset} ====")
 
         # 4. 构建模型
         if args.model == "mlp":
-            hidden_dim = args.hidden_dim  # 默认 128
+            hidden_dim = args.hidden_dim
             model = build_4layer_mlp(
                 input_dim=input_dim,
                 output_dim=1,
@@ -229,7 +227,7 @@ def main():
             )
             model_tag = f"mlp4_h{hidden_dim}"
         else:  # PU 模型
-            hidden_dim = args.pu_hidden_dim  # 默认 64
+            hidden_dim = args.pu_hidden_dim
             model = RealPUResNet1D(
                 input_dim=input_dim,
                 hidden_dim=hidden_dim,
@@ -258,7 +256,7 @@ def main():
             val_losses.append(val_loss)
 
             print(
-                f"[{args.dataset}][{args.model}][run {run+1}] "
+                f"[{args.dataset}][{args.model}][run {run + 1}] "
                 f"Epoch {epoch:03d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f}"
             )
 
@@ -277,7 +275,7 @@ def main():
         all_test_losses.append(test_loss)
 
         print(
-            f"[{args.dataset}][{args.model}][run {run+1}] "
+            f"[{args.dataset}][{args.model}][run {run + 1}] "
             f"Best val_loss={best_val_loss:.4f} | test_loss={test_loss:.4f}"
         )
 
@@ -292,7 +290,7 @@ def main():
                 "model_state_dict": best_state,
                 "input_dim": input_dim,
                 "hidden_dim": hidden_dim,
-                "seed": seed,
+                "seed": None,  # 当前版本不再使用固定 seed
             },
             ckpt_path
         )

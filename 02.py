@@ -111,7 +111,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="friedman",
+        default="california",
         choices=["friedman", "concrete", "california"],
         help="选择数据集"
     )
