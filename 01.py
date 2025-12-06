@@ -1,6 +1,7 @@
 # train_mlp.py
 import argparse
 import os
+import random
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,19 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 from mlp_models import build_4layer_mlp
+from pu_models import RealPUResNet1D   # 你也可以改成从 build_real_pu_resnet1d 导入
+
+
+def set_seed(seed: int):
+    """为每次 run 固定随机种子，保证可复现"""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    # 保证 determinism（会稍微慢一点，可以按需关掉）
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def load_friedman():
@@ -148,17 +162,29 @@ def main():
         choices=["friedman", "concrete", "california"],
         help="选择数据集"
     )
-    parser.add_argument("--hidden_dim", type=int, default=128)
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="pu",
+        choices=["mlp", "pu"],
+        help="选择模型类型：普通 MLP 或 PU 残差网络"
+    )
+    parser.add_argument("--hidden_dim", type=int, default=128,
+                        help="MLP 的隐藏维度（默认 128）")
+    parser.add_argument("--pu_hidden_dim", type=int, default=128,
+                        help="PU 网络的隐藏维度（默认 128）")
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--save_dir", type=str, default="./checkpoints",
                         help="保存最佳模型的目录")
+    parser.add_argument("--runs", type=int, default=5,
+                        help="同一配置重复训练次数（默认 5 次）")
     args = parser.parse_args()
 
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # 1. 加载 & 划分数据
+    # 1. 加载 & 划分数据（只做一次，每个 run 共用同一划分）
     if args.dataset == "friedman":
         X_train, X_val, X_test, y_train, y_val, y_test = load_friedman()
     elif args.dataset == "concrete":
@@ -181,68 +207,115 @@ def main():
         batch_size=args.batch_size
     )
 
-    # 4. 模型、优化器、损失
     input_dim = X_train_s.shape[1]
-    model = build_4layer_mlp(
-        input_dim=input_dim,
-        output_dim=1,
-        hidden_dim=args.hidden_dim
-    )
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    best_val_loss = np.inf
-    best_state = None
+    all_test_losses = []
 
-    # 5. 训练循环
-    for epoch in range(1, args.epochs + 1):
-        train_loss = train_one_epoch(
-            model, train_loader, criterion, optimizer, device
+    # 🔁 多次训练（不同随机种子）
+    for run in range(args.runs):
+        seed = run  # 你也可以用别的种子策略
+        set_seed(seed)
+        print(f"\n==== Run {run+1}/{args.runs}, seed={seed}, model={args.model}, dataset={args.dataset} ====")
+
+        # 4. 构建模型
+        if args.model == "mlp":
+            hidden_dim = args.hidden_dim  # 默认 128
+            model = build_4layer_mlp(
+                input_dim=input_dim,
+                output_dim=1,
+                hidden_dim=hidden_dim
+            )
+            model_tag = f"mlp4_h{hidden_dim}"
+        else:  # PU 模型
+            hidden_dim = args.pu_hidden_dim  # 默认 64
+            model = RealPUResNet1D(
+                input_dim=input_dim,
+                hidden_dim=hidden_dim,
+                output_dim=1
+            )
+            model_tag = f"puresnet_h{hidden_dim}"
+
+        model.to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+
+        best_val_loss = np.inf
+        best_state = None
+        train_losses = []
+        val_losses = []
+
+        # 5. 训练循环
+        for epoch in range(1, args.epochs + 1):
+            train_loss = train_one_epoch(
+                model, train_loader, criterion, optimizer, device
+            )
+            val_loss = eval_one_epoch(
+                model, val_loader, criterion, device
+            )
+
+            train_losses.append(train_loss)
+            val_losses.append(val_loss)
+
+            print(
+                f"[{args.dataset}][{args.model}][run {run+1}] "
+                f"Epoch {epoch:03d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f}"
+            )
+
+            # 记录最优验证集模型参数
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_state = model.state_dict()
+
+        # 6. 使用最优验证模型在测试集上评估
+        if best_state is not None:
+            model.load_state_dict(best_state)
+
+        test_loss = eval_one_epoch(
+            model, test_loader, criterion, device
         )
-        val_loss = eval_one_epoch(
-            model, val_loader, criterion, device
-        )
+        all_test_losses.append(test_loss)
 
         print(
-            f"[{args.dataset}] Epoch {epoch:03d} | "
-            f"train_loss={train_loss:.4f} | val_loss={val_loss:.4f}"
+            f"[{args.dataset}][{args.model}][run {run+1}] "
+            f"Best val_loss={best_val_loss:.4f} | test_loss={test_loss:.4f}"
         )
 
-        # 记录最优验证集模型参数
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_state = model.state_dict()
+        # 7. 保存 checkpoint（每个 run 单独保存）
+        ckpt_path = os.path.join(
+            args.save_dir,
+            f"{model_tag}_{args.dataset}_run{run}_best.pth"
+        )
+        torch.save(
+            {
+                "model_type": args.model,
+                "model_state_dict": best_state,
+                "input_dim": input_dim,
+                "hidden_dim": hidden_dim,
+                "seed": seed,
+            },
+            ckpt_path
+        )
+        print(f"已保存最佳模型到: {ckpt_path}")
 
-    # 6. 使用最优验证模型在测试集上评估
-    if best_state is not None:
-        model.load_state_dict(best_state)
+        # 8. 保存当前 run 的 loss 曲线数据
+        loss_path = os.path.join(
+            args.save_dir,
+            f"{model_tag}_{args.dataset}_run{run}_losses.npz"
+        )
+        np.savez(
+            loss_path,
+            train_losses=np.array(train_losses),
+            val_losses=np.array(val_losses),
+        )
+        print(f"已保存 loss 曲线到: {loss_path}")
 
-    test_loss = eval_one_epoch(
-        model, test_loader, criterion, device
-    )
-    print(
-        f"[{args.dataset}] Best val_loss={best_val_loss:.4f} | "
-        f"test_loss={test_loss:.4f}"
-    )
-
-    # 7. 保存 checkpoint（包含结构必要信息）
-    ckpt_path = os.path.join(
-        args.save_dir,
-        f"mlp4_{args.dataset}_best.pth"
-    )
-    torch.save(
-        {
-            "model_state_dict": best_state,
-            "input_dim": input_dim,
-            "hidden_dim": args.hidden_dim,
-        },
-        ckpt_path
-    )
-    print(f"已保存最佳模型到: {ckpt_path}")
+    # 9. 打印多次训练的 test loss 统计
+    all_test_losses = np.array(all_test_losses)
+    print(f"\n==== Summary [{args.dataset}][{args.model}] over {args.runs} runs ====")
+    print("Test losses:", all_test_losses)
+    print("Mean test loss:", all_test_losses.mean())
+    print("Std  test loss:", all_test_losses.std())
 
 
 if __name__ == "__main__":

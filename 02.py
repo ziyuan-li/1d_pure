@@ -1,5 +1,6 @@
 # test_mlp.py
 import argparse
+import os
 
 import numpy as np
 import pandas as pd
@@ -12,6 +13,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
 from mlp_models import build_4layer_mlp
+from pu_models import RealPUResNet1D
 
 
 def load_friedman():
@@ -100,6 +102,10 @@ def eval_on_test(model, loader, device):
     return total_loss / n
 
 
+def count_parameters(model: nn.Module) -> int:
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -110,27 +116,17 @@ def main():
         help="选择数据集"
     )
     parser.add_argument(
-        "--ckpt_path",
+        "--save_dir",
         type=str,
-        default=None,
-        help="保存的 MLP4 checkpoint 路径（默认 ./checkpoints/mlp4_{dataset}_best.pth）"
+        default="./checkpoints",
+        help="checkpoint 和 loss 文件所在目录"
     )
     parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--runs", type=int, default=5,
+                        help="每种模型的重复训练次数（默认 5）")
     args = parser.parse_args()
 
-    # 1. 选择 checkpoint 路径
-    if args.ckpt_path is None:
-        ckpt_path = f"./checkpoints/mlp4_{args.dataset}_best.pth"
-    else:
-        ckpt_path = args.ckpt_path
-
-    print(f"加载 checkpoint: {ckpt_path}")
-    ckpt = torch.load(ckpt_path, map_location="cpu")
-    input_dim_ckpt = ckpt["input_dim"]
-    hidden_dim_ckpt = ckpt["hidden_dim"]
-    state_dict = ckpt["model_state_dict"]
-
-    # 2. 重新加载数据并按相同方式划分 + 标准化
+    # 1. 加载数据并划分 + 标准化（与训练保持完全一致）
     if args.dataset == "friedman":
         X_train, X_val, X_test, y_train, y_val, y_test = load_friedman()
     elif args.dataset == "concrete":
@@ -145,27 +141,79 @@ def main():
         y_train, y_val, y_test
     )
 
-    # 检查 input_dim 一致性
     input_dim_data = X_train_s.shape[1]
-    assert input_dim_data == input_dim_ckpt, \
-        f"Input dim mismatch: data={input_dim_data}, ckpt={input_dim_ckpt}"
-
-    # 3. 构建模型并加载参数
-    model = build_4layer_mlp(
-        input_dim=input_dim_ckpt,
-        output_dim=1,
-        hidden_dim=hidden_dim_ckpt
-    )
-    model.load_state_dict(state_dict)
+    test_loader = make_test_loader(X_test_s, y_test_s, batch_size=args.batch_size)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
 
-    # 4. 只在测试集上评估
-    test_loader = make_test_loader(X_test_s, y_test_s, batch_size=args.batch_size)
-    test_loss = eval_on_test(model, test_loader, device)
+    # 要统计的两种模型
+    model_configs = [
+        ("mlp", "mlp4_h128"),      # 对应 train 脚本中的 model_tag
+        ("pu", "puresnet_h128"),
+    ]
 
-    print(f"[{args.dataset}] Loaded checkpoint test_loss={test_loss:.4f}")
+    for model_type, model_tag in model_configs:
+        test_losses = []
+        param_count = None
+
+        print(f"\n==== Evaluating [{model_type}] on dataset [{args.dataset}] over {args.runs} runs ====")
+
+        for run in range(args.runs):
+            ckpt_path = os.path.join(
+                args.save_dir,
+                f"{model_tag}_{args.dataset}_run{run}_best.pth"
+            )
+            if not os.path.exists(ckpt_path):
+                print(f"  [run {run}] 找不到 checkpoint: {ckpt_path}，跳过")
+                continue
+
+            ckpt = torch.load(ckpt_path, map_location="cpu")
+            input_dim_ckpt = ckpt["input_dim"]
+            hidden_dim_ckpt = ckpt["hidden_dim"]
+            state_dict = ckpt["model_state_dict"]
+            model_type_ckpt = ckpt.get("model_type", model_type)
+
+            # 一致性检查
+            assert input_dim_ckpt == input_dim_data, \
+                f"Input dim mismatch: data={input_dim_data}, ckpt={input_dim_ckpt}"
+            assert model_type_ckpt == model_type, \
+                f"Model type mismatch in ckpt: expected {model_type}, got {model_type_ckpt}"
+
+            # 根据 model_type 重建模型
+            if model_type == "mlp":
+                model = build_4layer_mlp(
+                    input_dim=input_dim_ckpt,
+                    output_dim=1,
+                    hidden_dim=hidden_dim_ckpt,
+                )
+            else:  # "pu"
+                model = RealPUResNet1D(
+                    input_dim=input_dim_ckpt,
+                    hidden_dim=hidden_dim_ckpt,
+                    output_dim=1,
+                )
+
+            model.load_state_dict(state_dict)
+            model.to(device)
+
+            # 只统计一次参数量
+            if param_count is None:
+                param_count = count_parameters(model)
+
+            # 评估 test loss
+            test_loss = eval_on_test(model, test_loader, device)
+            test_losses.append(test_loss)
+            print(f"  [run {run}] test_loss={test_loss:.6f}")
+
+        test_losses = np.array(test_losses)
+        if len(test_losses) == 0:
+            print(f"  没有找到任何 {model_type} 的 checkpoint，无法统计。")
+            continue
+
+        print(f"\n  >> {model_type} 参数数量: {param_count}")
+        print(f"  >> {model_type} test_loss (over {len(test_losses)} runs):")
+        print(f"     mean = {test_losses.mean():.4f}")
+        print(f"     std  = {test_losses.std():.4f}")
 
 
 if __name__ == "__main__":
