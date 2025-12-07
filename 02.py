@@ -112,7 +112,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="concrete",
+        default="california",
         choices=["friedman", "concrete", "california"],
         help="选择数据集"
     )
@@ -125,6 +125,13 @@ def main():
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--runs", type=int, default=5,
                         help="每种模型的重复训练次数（默认 5）")
+    parser.add_argument(
+        "--noise_stds",
+        type=float,
+        nargs="+",
+        default=[0.0, 0.05],
+        help="测试集上添加的高斯噪声标准差列表（在标准化后的特征空间），必须包含 0.0"
+    )
     args = parser.parse_args()
 
     # 1. 加载数据并划分 + 标准化（与训练保持完全一致）
@@ -143,8 +150,25 @@ def main():
     )
 
     input_dim_data = X_train_s.shape[1]
-    test_loader = make_test_loader(X_test_s, y_test_s, batch_size=args.batch_size)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # 噪声水平列表（确保有 0.0）
+    noise_stds = sorted(set(args.noise_stds))
+    if 0.0 not in noise_stds:
+        noise_stds = [0.0] + noise_stds
+
+    print(f"\n将对以下噪声水平进行测试: {noise_stds}")
+
+    # 固定噪声，实现不同模型/不同 run 共享同一份噪声
+    rng = np.random.RandomState(123)
+    test_noises = {}
+    for std in noise_stds:
+        if std == 0.0:
+            test_noises[std] = np.zeros_like(X_test_s)
+        else:
+            test_noises[std] = rng.normal(
+                loc=0.0, scale=std, size=X_test_s.shape
+            )
 
     # 两种模型配置：和 train 脚本里的 model_tag 对应
     model_configs = [
@@ -158,8 +182,13 @@ def main():
         "pu": {"train": [], "val": []},
     }
 
+    # 用来存储鲁棒性结果：model_type -> {noise_std: [test_losses_over_runs]}
+    robustness_results = {
+        "mlp": {std: [] for std in noise_stds},
+        "pu": {std: [] for std in noise_stds},
+    }
+
     for model_type, model_tag in model_configs:
-        test_losses = []
         param_count = None
 
         print(f"\n==== Evaluating [{model_type}] on dataset [{args.dataset}] over {args.runs} runs ====")
@@ -211,12 +240,17 @@ def main():
             if param_count is None:
                 param_count = count_parameters(model)
 
-            # 评估 test loss
-            test_loss = eval_on_test(model, test_loader, device)
-            test_losses.append(test_loss)
-            print(f"  [run {run}] test_loss={test_loss:.4f}")
+            # 在多种噪声水平下评估
+            for std in noise_stds:
+                X_test_noisy = X_test_s + test_noises[std]
+                test_loader = make_test_loader(
+                    X_test_noisy, y_test_s, batch_size=args.batch_size
+                )
+                test_loss = eval_on_test(model, test_loader, device)
+                robustness_results[model_type][std].append(test_loss)
+                # print(f"  [run {run}] noise_std={std:.3f} | test_loss={test_loss:.4f}")
 
-            # 读取当前 run 的 loss 曲线
+            # 读取当前 run 的 loss 曲线（用于画训练/验证 loss）
             if os.path.exists(loss_path):
                 loss_data = np.load(loss_path)
                 train_losses = loss_data["train_losses"]
@@ -226,20 +260,17 @@ def main():
             else:
                 print(f"  [run {run}] 未找到 loss 文件: {loss_path}")
 
-        test_losses = np.array(test_losses)
-        if len(test_losses) == 0:
-            print(f"  没有找到任何 {model_type} 的 checkpoint，无法统计。")
-            continue
-
+        # 打印鲁棒性统计结果
         print(f"\n  >> {model_type} 参数数量: {param_count}")
-        print(f"  >> {model_type} test_loss (over {len(test_losses)} runs):")
-        print(f"     mean = {test_losses.mean():.4f}")
-        print(f"     std  = {test_losses.std():.4f}")
+        print(f"  >> {model_type} robustness over noise_stds (mean ± std over runs):")
+        for std in noise_stds:
+            vals = np.array(robustness_results[model_type][std])
+            if len(vals) == 0:
+                continue
+            print(f"     noise_std={std:.3f} | mean={vals.mean():.6f} | std={vals.std():.6f}")
 
-    # ===== 画 MLP vs PU 的 loss 曲线对比（取各自 5 次的平均） =====
-    # 只在两种模型都有至少一次 loss 曲线时画
+    # ===== 画 MLP vs PU 的 loss 曲线对比（取各自 5 次的平均，log10） =====
     if loss_curves["mlp"]["train"] and loss_curves["pu"]["train"]:
-        # 转成 np.array: shape = (runs, epochs)
         mlp_train = np.array(loss_curves["mlp"]["train"])
         mlp_val = np.array(loss_curves["mlp"]["val"])
         pu_train = np.array(loss_curves["pu"]["train"])
@@ -259,65 +290,36 @@ def main():
 
         epochs = np.arange(1, min_epochs + 1)
 
-        mlp_train_mean = mlp_train.mean(axis=0)
-        mlp_val_mean = mlp_val.mean(axis=0)
-        pu_train_mean = pu_train.mean(axis=0)
-        pu_val_mean = pu_val.mean(axis=0)
+        eps = 1e-12  # 防止 log(0)
+        mlp_train_log = np.log10(mlp_train + eps)
+        mlp_val_log = np.log10(mlp_val + eps)
+        pu_train_log = np.log10(pu_train + eps)
+        pu_val_log = np.log10(pu_val + eps)
 
-        # ===== 使用 log10(loss) 画 MLP vs PU loss 曲线 =====
-        if loss_curves["mlp"]["train"] and loss_curves["pu"]["train"]:
-            mlp_train = np.array(loss_curves["mlp"]["train"])
-            mlp_val = np.array(loss_curves["mlp"]["val"])
-            pu_train = np.array(loss_curves["pu"]["train"])
-            pu_val = np.array(loss_curves["pu"]["val"])
+        mlp_train_mean = mlp_train_log.mean(axis=0)
+        mlp_val_mean = mlp_val_log.mean(axis=0)
+        pu_train_mean = pu_train_log.mean(axis=0)
+        pu_val_mean = pu_val_log.mean(axis=0)
 
-            # 统一长度
-            min_epochs = min(
-                mlp_train.shape[1],
-                mlp_val.shape[1],
-                pu_train.shape[1],
-                pu_val.shape[1],
-            )
-            mlp_train = mlp_train[:, :min_epochs]
-            mlp_val = mlp_val[:, :min_epochs]
-            pu_train = pu_train[:, :min_epochs]
-            pu_val = pu_val[:, :min_epochs]
+        plt.figure(figsize=(7, 5))
+        plt.plot(epochs, mlp_train_mean, label="MLP Train (log10)")
+        plt.plot(epochs, mlp_val_mean, label="MLP Val (log10)")
+        plt.plot(epochs, pu_train_mean, label="PU Train (log10)")
+        plt.plot(epochs, pu_val_mean, label="PU Val (log10)")
 
-            epochs = np.arange(1, min_epochs + 1)
+        plt.xlabel("Epoch")
+        plt.ylabel("log10(MSE Loss)")
+        plt.title(f"MLP vs PU Loss Curves (log10) on {args.dataset}")
+        plt.legend()
+        plt.tight_layout()
 
-            # 计算 log10(loss)
-            eps = 1e-12  # 防止 log(0)
-            mlp_train_log = np.log10(mlp_train + eps)
-            mlp_val_log = np.log10(mlp_val + eps)
-            pu_train_log = np.log10(pu_train + eps)
-            pu_val_log = np.log10(pu_val + eps)
-
-            # 求平均
-            mlp_train_mean = mlp_train_log.mean(axis=0)
-            mlp_val_mean = mlp_val_log.mean(axis=0)
-            pu_train_mean = pu_train_log.mean(axis=0)
-            pu_val_mean = pu_val_log.mean(axis=0)
-
-            plt.figure(figsize=(7, 5))
-            plt.plot(epochs, mlp_train_mean, label="MLP Train (log10)")
-            plt.plot(epochs, mlp_val_mean, label="MLP Val (log10)")
-            plt.plot(epochs, pu_train_mean, label="PU Train (log10)")
-            plt.plot(epochs, pu_val_mean, label="PU Val (log10)")
-
-            plt.xlabel("Epoch")
-            plt.ylabel("log10(MSE Loss)")
-            plt.title(f"MLP vs PU Loss Curves (log10) on {args.dataset}")
-            plt.legend()
-            plt.tight_layout()
-
-            fig_path = os.path.join(
-                args.save_dir,
-                f"loss_compare_{args.dataset}_mlp_vs_pu_log10.png"
-            )
-            plt.savefig(fig_path, dpi=200)
-            print(f"\n已保存 MLP vs PU log10 loss 对比图到: {fig_path}")
-            plt.show()
-
+        fig_path = os.path.join(
+            args.save_dir,
+            f"loss_compare_{args.dataset}_mlp_vs_pu_log10.png"
+        )
+        plt.savefig(fig_path, dpi=200)
+        print(f"\n已保存 MLP vs PU log10 loss 对比图到: {fig_path}")
+        plt.show()
     else:
         print("\nloss 曲线数据不完整，无法画 MLP vs PU 对比图。")
 
