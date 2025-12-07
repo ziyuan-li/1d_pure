@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
 
 from mlp_models import build_4layer_mlp
 from pu_models import RealPUResNet1D
@@ -111,7 +112,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        default="california",
+        default="concrete",
         choices=["friedman", "concrete", "california"],
         help="选择数据集"
     )
@@ -143,14 +144,19 @@ def main():
 
     input_dim_data = X_train_s.shape[1]
     test_loader = make_test_loader(X_test_s, y_test_s, batch_size=args.batch_size)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # 要统计的两种模型
+    # 两种模型配置：和 train 脚本里的 model_tag 对应
     model_configs = [
-        ("mlp", "mlp4_h128"),      # 对应 train 脚本中的 model_tag
+        ("mlp", "mlp4_h128"),
         ("pu", "puresnet_h128"),
     ]
+
+    # 用来存储画 loss 曲线的数据：model_type -> {'train': [runs], 'val': [runs]}
+    loss_curves = {
+        "mlp": {"train": [], "val": []},
+        "pu": {"train": [], "val": []},
+    }
 
     for model_type, model_tag in model_configs:
         test_losses = []
@@ -163,6 +169,11 @@ def main():
                 args.save_dir,
                 f"{model_tag}_{args.dataset}_run{run}_best.pth"
             )
+            loss_path = os.path.join(
+                args.save_dir,
+                f"{model_tag}_{args.dataset}_run{run}_losses.npz"
+            )
+
             if not os.path.exists(ckpt_path):
                 print(f"  [run {run}] 找不到 checkpoint: {ckpt_path}，跳过")
                 continue
@@ -179,7 +190,7 @@ def main():
             assert model_type_ckpt == model_type, \
                 f"Model type mismatch in ckpt: expected {model_type}, got {model_type_ckpt}"
 
-            # 根据 model_type 重建模型
+            # 构建模型
             if model_type == "mlp":
                 model = build_4layer_mlp(
                     input_dim=input_dim_ckpt,
@@ -196,14 +207,24 @@ def main():
             model.load_state_dict(state_dict)
             model.to(device)
 
-            # 只统计一次参数量
+            # 第一次记录参数量
             if param_count is None:
                 param_count = count_parameters(model)
 
             # 评估 test loss
             test_loss = eval_on_test(model, test_loader, device)
             test_losses.append(test_loss)
-            print(f"  [run {run}] test_loss={test_loss:.6f}")
+            print(f"  [run {run}] test_loss={test_loss:.4f}")
+
+            # 读取当前 run 的 loss 曲线
+            if os.path.exists(loss_path):
+                loss_data = np.load(loss_path)
+                train_losses = loss_data["train_losses"]
+                val_losses = loss_data["val_losses"]
+                loss_curves[model_type]["train"].append(train_losses)
+                loss_curves[model_type]["val"].append(val_losses)
+            else:
+                print(f"  [run {run}] 未找到 loss 文件: {loss_path}")
 
         test_losses = np.array(test_losses)
         if len(test_losses) == 0:
@@ -214,6 +235,91 @@ def main():
         print(f"  >> {model_type} test_loss (over {len(test_losses)} runs):")
         print(f"     mean = {test_losses.mean():.4f}")
         print(f"     std  = {test_losses.std():.4f}")
+
+    # ===== 画 MLP vs PU 的 loss 曲线对比（取各自 5 次的平均） =====
+    # 只在两种模型都有至少一次 loss 曲线时画
+    if loss_curves["mlp"]["train"] and loss_curves["pu"]["train"]:
+        # 转成 np.array: shape = (runs, epochs)
+        mlp_train = np.array(loss_curves["mlp"]["train"])
+        mlp_val = np.array(loss_curves["mlp"]["val"])
+        pu_train = np.array(loss_curves["pu"]["train"])
+        pu_val = np.array(loss_curves["pu"]["val"])
+
+        # 防止不同 run epoch 数稍有不同，统一取最短长度
+        min_epochs = min(
+            mlp_train.shape[1],
+            mlp_val.shape[1],
+            pu_train.shape[1],
+            pu_val.shape[1],
+        )
+        mlp_train = mlp_train[:, :min_epochs]
+        mlp_val = mlp_val[:, :min_epochs]
+        pu_train = pu_train[:, :min_epochs]
+        pu_val = pu_val[:, :min_epochs]
+
+        epochs = np.arange(1, min_epochs + 1)
+
+        mlp_train_mean = mlp_train.mean(axis=0)
+        mlp_val_mean = mlp_val.mean(axis=0)
+        pu_train_mean = pu_train.mean(axis=0)
+        pu_val_mean = pu_val.mean(axis=0)
+
+        # ===== 使用 log10(loss) 画 MLP vs PU loss 曲线 =====
+        if loss_curves["mlp"]["train"] and loss_curves["pu"]["train"]:
+            mlp_train = np.array(loss_curves["mlp"]["train"])
+            mlp_val = np.array(loss_curves["mlp"]["val"])
+            pu_train = np.array(loss_curves["pu"]["train"])
+            pu_val = np.array(loss_curves["pu"]["val"])
+
+            # 统一长度
+            min_epochs = min(
+                mlp_train.shape[1],
+                mlp_val.shape[1],
+                pu_train.shape[1],
+                pu_val.shape[1],
+            )
+            mlp_train = mlp_train[:, :min_epochs]
+            mlp_val = mlp_val[:, :min_epochs]
+            pu_train = pu_train[:, :min_epochs]
+            pu_val = pu_val[:, :min_epochs]
+
+            epochs = np.arange(1, min_epochs + 1)
+
+            # 计算 log10(loss)
+            eps = 1e-12  # 防止 log(0)
+            mlp_train_log = np.log10(mlp_train + eps)
+            mlp_val_log = np.log10(mlp_val + eps)
+            pu_train_log = np.log10(pu_train + eps)
+            pu_val_log = np.log10(pu_val + eps)
+
+            # 求平均
+            mlp_train_mean = mlp_train_log.mean(axis=0)
+            mlp_val_mean = mlp_val_log.mean(axis=0)
+            pu_train_mean = pu_train_log.mean(axis=0)
+            pu_val_mean = pu_val_log.mean(axis=0)
+
+            plt.figure(figsize=(7, 5))
+            plt.plot(epochs, mlp_train_mean, label="MLP Train (log10)")
+            plt.plot(epochs, mlp_val_mean, label="MLP Val (log10)")
+            plt.plot(epochs, pu_train_mean, label="PU Train (log10)")
+            plt.plot(epochs, pu_val_mean, label="PU Val (log10)")
+
+            plt.xlabel("Epoch")
+            plt.ylabel("log10(MSE Loss)")
+            plt.title(f"MLP vs PU Loss Curves (log10) on {args.dataset}")
+            plt.legend()
+            plt.tight_layout()
+
+            fig_path = os.path.join(
+                args.save_dir,
+                f"loss_compare_{args.dataset}_mlp_vs_pu_log10.png"
+            )
+            plt.savefig(fig_path, dpi=200)
+            print(f"\n已保存 MLP vs PU log10 loss 对比图到: {fig_path}")
+            plt.show()
+
+    else:
+        print("\nloss 曲线数据不完整，无法画 MLP vs PU 对比图。")
 
 
 if __name__ == "__main__":
