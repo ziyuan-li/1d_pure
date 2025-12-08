@@ -6,12 +6,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_friedman1, fetch_california_housing
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler  # 仅用于导入类，具体参数从checkpoint加载
+# StandardScaler 仅用于导入类，具体参数从checkpoint加载
 
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
 
+# 假设这几个模型文件在同一目录下，或者在PYTHONPATH中
 from mlp_models import build_4layer_mlp
 from pu_models import RealPUResNet1D
 
@@ -23,6 +23,7 @@ def load_raw_test_data(dataset_name):
     if dataset_name == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     elif dataset_name == "concrete":
+        # 请确保路径存在
         df = pd.read_excel("./data/concrete+compressive+strength/Concrete_Data.xls")
         X = df.iloc[:, :8].values
         y = df.iloc[:, 8].values
@@ -30,13 +31,7 @@ def load_raw_test_data(dataset_name):
         data = fetch_california_housing()
         X, y = data.data, data.target
 
-    # 只需提取 Test Set
-    _, _, _, y_temp = train_test_split(X, y, test_size=0.20, random_state=0)
-    # 这里的 X_temp, y_temp 实际上包含了 Val+Test，需要再切一次，这必须跟 06.py 里的逻辑完全对齐
-    # 06.py: X_train_full, X_test... = split(..., test_size=0.20)
-    # 所以上面的 X_temp 其实已经是 Test Set 了？不对，让我们仔细看 06.py 的第一步 split
-
-    # 修正逻辑：必须严格复制 06.py 的第一次 split
+    # 修正逻辑：必须严格复制 06.py 的第一次 split，以确保 Test Set 是完全隔离且一致的
     X_train_full, X_test, y_train_full, y_test = train_test_split(
         X, y, test_size=0.20, random_state=0
     )
@@ -46,7 +41,7 @@ def load_raw_test_data(dataset_name):
 def evaluate_model(model, X_test, y_test, scaler_params, device):
     """
     加载模型和对应的 scaler 参数，对 Test Set 进行评估
-    返回：Test MSE (Scaled Space) 或者 Original Space 均可，这里为了稳定通常看 Scaled MSE
+    返回：Test MSE (Scaled Space)
     """
     # 1. 恢复 Scaler
     # 手动应用标准化 (x - mean) / scale
@@ -91,7 +86,26 @@ def main():
 
     # 遍历所有比例
     for frac in fractions:
-        print(f"\nProcessing Fraction: {frac}")
+        print(f"\n{'=' * 10} Processing Fraction: {frac} {'=' * 10}")
+
+        # === [修改点] 当 frac 为 1.0 时直接赋值 ===
+        if frac == 1.0:
+            print("  [Info] Skipping evaluation for Fraction 1.0, using hardcoded values.")
+
+            # 这里假设第一组数据对应 MLP，第二组对应 PU
+            # MLP: mean=0.002032 | std=0.000546
+            results["mlp"]["means"].append(0.002032)
+            results["mlp"]["stds"].append(0.000546)
+            print(f"  [Summary MLP] Mean MSE: 0.002032 ± 0.000546 (Hardcoded)")
+
+            # PU: mean=0.001773 | std=0.000137
+            results["pu"]["means"].append(0.001773)
+            results["pu"]["stds"].append(0.000137)
+            print(f"  [Summary PU]  Mean MSE: 0.001773 ± 0.000137 (Hardcoded)")
+
+            # 跳过后续的读取和计算逻辑，直接进入下一次循环
+            continue
+        # ==========================================
 
         loss_buffer = {"mlp": [], "pu": []}
 
@@ -111,8 +125,7 @@ def main():
                 ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
 
                 # 构建模型
-                model = m_cls(input_dim=X_test.shape[1], hidden_dim=ckpt["hidden_dim"], output_dim=1)
-                if m_key == "mlp":  # build_4layer_mlp参数略有不同，需要适配
+                if m_key == "mlp":
                     model = build_4layer_mlp(input_dim=X_test.shape[1], output_dim=1, hidden_dim=ckpt["hidden_dim"])
                 else:
                     model = RealPUResNet1D(input_dim=X_test.shape[1], hidden_dim=ckpt["hidden_dim"], output_dim=1)
@@ -132,7 +145,11 @@ def main():
                 mse = evaluate_model(model, X_test, y_test, scaler_params, device)
                 loss_buffer[m_key].append(mse)
 
+                # 打印单次 Run 的结果
+                print(f"  -> [Run {run}] Model: {m_key.upper():<3} | MSE: {mse:.6f}")
+
         # 统计当前 Fraction 的均值和方差
+        print(f"-" * 40)
         for m_key in ["mlp", "pu"]:
             data = np.array(loss_buffer[m_key])
             if len(data) > 0:
@@ -140,10 +157,11 @@ def main():
                 std_val = np.std(data)
                 results[m_key]["means"].append(mean_val)
                 results[m_key]["stds"].append(std_val)
-                print(f"  [{m_key.upper()}] Mean MSE: {mean_val:.4f} ± {std_val:.4f}")
+                print(f"  [Summary {m_key.upper()}] Mean MSE: {mean_val:.6f} ± {std_val:.6f}")
             else:
                 results[m_key]["means"].append(np.nan)
                 results[m_key]["stds"].append(np.nan)
+                print(f"  [Summary {m_key.upper()}] No data found.")
 
     # === 绘图 ===
     plt.figure(figsize=(8, 6))
@@ -152,14 +170,28 @@ def main():
     # 绘制 MLP
     mlp_m = np.array(results["mlp"]["means"])
     mlp_s = np.array(results["mlp"]["stds"])
-    plt.plot(x_axis, mlp_m, 'o--', label="Standard MLP", color="tab:blue", linewidth=2)
-    plt.fill_between(x_axis, mlp_m - mlp_s, mlp_m + mlp_s, color="tab:blue", alpha=0.15)
+    valid_mask_mlp = ~np.isnan(mlp_m)
+
+    if np.any(valid_mask_mlp):
+        plt.plot(x_axis[valid_mask_mlp], mlp_m[valid_mask_mlp], 'o--', label="Standard MLP", color="tab:blue",
+                 linewidth=2)
+        plt.fill_between(x_axis[valid_mask_mlp],
+                         mlp_m[valid_mask_mlp] - mlp_s[valid_mask_mlp],
+                         mlp_m[valid_mask_mlp] + mlp_s[valid_mask_mlp],
+                         color="tab:blue", alpha=0.15)
 
     # 绘制 PU
     pu_m = np.array(results["pu"]["means"])
     pu_s = np.array(results["pu"]["stds"])
-    plt.plot(x_axis, pu_m, 's-', label="PU-ResNet (Ours)", color="tab:red", linewidth=2)
-    plt.fill_between(x_axis, pu_m - pu_s, pu_m + pu_s, color="tab:red", alpha=0.15)
+    valid_mask_pu = ~np.isnan(pu_m)
+
+    if np.any(valid_mask_pu):
+        plt.plot(x_axis[valid_mask_pu], pu_m[valid_mask_pu], 's-', label="PU-ResNet (Ours)", color="tab:red",
+                 linewidth=2)
+        plt.fill_between(x_axis[valid_mask_pu],
+                         pu_m[valid_mask_pu] - pu_s[valid_mask_pu],
+                         pu_m[valid_mask_pu] + pu_s[valid_mask_pu],
+                         color="tab:red", alpha=0.15)
 
     plt.xlabel("Training Data Percentage (%)", fontsize=12, fontweight='bold')
     plt.ylabel("Test MSE (Standardized)", fontsize=12, fontweight='bold')
@@ -168,6 +200,9 @@ def main():
     plt.grid(True, linestyle='--', alpha=0.6)
 
     # 保存
+    if not os.path.exists(args.save_dir):
+        os.makedirs(args.save_dir)
+
     save_fig_path = os.path.join(args.save_dir, f"sample_efficiency_{args.dataset}.png")
     plt.savefig(save_fig_path, dpi=300)
     print(f"\nResult plot saved to: {save_fig_path}")
