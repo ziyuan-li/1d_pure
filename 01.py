@@ -165,7 +165,7 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="pu",
+        default="mlp",
         choices=["mlp", "pu"],
         help="选择模型类型：普通 MLP 或 PU 残差网络"
     )
@@ -176,7 +176,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--save_dir", type=str, default="./checkpoints",
+    parser.add_argument("--save_dir", type=str, default="./checkpoints_test_ini0",
                         help="保存最佳模型的目录")
     parser.add_argument("--runs", type=int, default=5,
                         help="同一配置重复训练次数（默认 5 次）")
