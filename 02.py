@@ -16,7 +16,13 @@ from mlp_models import build_4layer_mlp
 from pu_models import RealPUResNet1D
 
 
-# --- 数据加载与预处理函数 (保持不变) ---
+# --- 辅助工具函数 ---
+def count_parameters(model: nn.Module) -> int:
+    """ 计算模型的可训练参数总量 """
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+# --- 数据加载函数 (保持不变) ---
 def load_friedman():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=0)
@@ -67,32 +73,31 @@ def eval_on_test(model, loader, device):
 def plot_loss_curves(loss_curves, dataset_name, save_dir):
     """ 为单个数据集绘制 MLP vs PU 的 Loss 对比图 """
     try:
-        mlp_train = np.array(loss_curves["mlp"]["train"])
-        mlp_val = np.array(loss_curves["mlp"]["val"])
-        pu_train = np.array(loss_curves["pu"]["train"])
-        pu_val = np.array(loss_curves["pu"]["val"])
-
-        min_epochs = min(mlp_train.shape[1], mlp_val.shape[1], pu_train.shape[1], pu_val.shape[1])
-        epochs = np.arange(1, min_epochs + 1)
-        eps = 1e-12
-
         plt.figure(figsize=(8, 5))
-        plt.plot(epochs, np.log10(mlp_train[:, :min_epochs].mean(axis=0) + eps), label="MLP Train")
-        plt.plot(epochs, np.log10(mlp_val[:, :min_epochs].mean(axis=0) + eps), label="MLP Val")
-        plt.plot(epochs, np.log10(pu_train[:, :min_epochs].mean(axis=0) + eps), label="PU Train", linestyle='--')
-        plt.plot(epochs, np.log10(pu_val[:, :min_epochs].mean(axis=0) + eps), label="PU Val", linestyle='--')
+        for m_type in ["mlp", "pu"]:
+            train_data = np.array(loss_curves[m_type]["train"])
+            val_data = np.array(loss_curves[m_type]["val"])
+            if train_data.size == 0: continue
+
+            min_len = min(train_data.shape[1], val_data.shape[1])
+            epochs = np.arange(1, min_len + 1)
+
+            ls = '-' if m_type == "mlp" else '--'
+            plt.plot(epochs, np.log10(train_data[:, :min_len].mean(axis=0) + 1e-12),
+                     label=f"{m_type.upper()} Train", linestyle=ls)
+            plt.plot(epochs, np.log10(val_data[:, :min_len].mean(axis=0) + 1e-12),
+                     label=f"{m_type.upper()} Val", linestyle=ls)
 
         plt.xlabel("Epoch")
         plt.ylabel("log10(MSE Loss)")
-        plt.title(f"Loss Curves on {dataset_name.upper()}")
+        plt.title(f"Training History on {dataset_name.upper()}")
         plt.legend()
-        plt.grid(True, which="both", ls="-", alpha=0.5)
+        plt.grid(True, alpha=0.3)
         plt.tight_layout()
-
         plt.savefig(os.path.join(save_dir, f"loss_{dataset_name}.png"), dpi=200)
         plt.close()
     except Exception as e:
-        print(f"  [Warning] 绘制 {dataset_name} 图表失败: {e}")
+        print(f"  [!] 绘图失败 ({dataset_name}): {e}")
 
 
 def main():
@@ -107,31 +112,34 @@ def main():
     noise_stds = sorted(set(args.noise_stds))
     if 0.0 not in noise_stds: noise_stds = [0.0] + noise_stds
 
-    final_results = []  # 存储所有结果用于表格展示
+    final_results = []
 
     for dname in datasets:
-        print(f"\n>>> 正在处理数据集: {dname.upper()} ...")
-
-        # 1. 加载数据
-        if dname == "friedman":
-            data_splits = load_friedman()
-        elif dname == "concrete":
-            data_splits = load_concrete()
-        else:
-            data_splits = load_california()
+        print(f"\n>>> Loading dataset: {dname.upper()}...")
+        try:
+            if dname == "friedman":
+                data_splits = load_friedman()
+            elif dname == "concrete":
+                data_splits = load_concrete()
+            else:
+                data_splits = load_california()
+        except Exception as e:
+            print(f"    无法加载 {dname}: {e}")
+            continue
 
         X_train_s, X_val_s, X_test_s, y_train_s, y_val_s, y_test_s = standardize_splits(*data_splits)
+        input_dim = X_train_s.shape[1]
 
-        # 准备共享噪声
+        # 预生成噪声
         rng = np.random.RandomState(123)
         test_noises = {std: (np.zeros_like(X_test_s) if std == 0.0 else rng.normal(0, std, X_test_s.shape)) for std in
                        noise_stds}
 
-        # 准备存储当前数据集的 Loss 曲线
         current_loss_curves = {"mlp": {"train": [], "val": []}, "pu": {"train": [], "val": []}}
 
         for model_type, model_tag in [("mlp", "mlp4_h128"), ("pu", "puresnet_h128")]:
             run_metrics = {std: [] for std in noise_stds}
+            param_count = 0
 
             for run in range(args.runs):
                 ckpt_path = os.path.join(args.save_dir, f"{model_tag}_{dname}_run{run}_best.pth")
@@ -139,48 +147,54 @@ def main():
 
                 if not os.path.exists(ckpt_path): continue
 
-                # 加载模型
+                # 构建与加载模型
                 ckpt = torch.load(ckpt_path, map_location="cpu")
-                model = build_4layer_mlp(X_train_s.shape[1], 1, ckpt["hidden_dim"]) if model_type == "mlp" \
-                    else RealPUResNet1D(X_train_s.shape[1], ckpt["hidden_dim"], 1)
+                h_dim = ckpt["hidden_dim"]
+                model = build_4layer_mlp(input_dim, 1, h_dim) if model_type == "mlp" \
+                    else RealPUResNet1D(input_dim, h_dim, 1)
                 model.load_state_dict(ckpt["model_state_dict"])
                 model.to(device)
 
-                # 测试鲁棒性
+                # 记录参数量 (只需记录一次)
+                if param_count == 0:
+                    param_count = count_parameters(model)
+
+                # 评估各噪声下的表现
                 for std in noise_stds:
                     X_noisy = torch.from_numpy(X_test_s + test_noises[std]).float()
                     y_true = torch.from_numpy(y_test_s).float().unsqueeze(-1)
                     loader = DataLoader(TensorDataset(X_noisy, y_true), batch_size=128)
                     run_metrics[std].append(eval_on_test(model, loader, device))
 
-                # 读取 Loss 曲线
+                # 读取历史 Loss
                 if os.path.exists(loss_path):
                     ld = np.load(loss_path)
                     current_loss_curves[model_type]["train"].append(ld["train_losses"])
                     current_loss_curves[model_type]["val"].append(ld["val_losses"])
 
-            # 汇总到 final_results
+            # 填充结果数据
             for std in noise_stds:
                 vals = np.array(run_metrics[std])
                 if len(vals) > 0:
                     final_results.append({
-                        "Dataset": dname, "Model": model_type.upper(), "Noise": std,
-                        "MSE_Mean": vals.mean(), "MSE_Std": vals.std()
+                        "Dataset": dname, "Model": model_type.upper(), "Params": param_count,
+                        "Noise": std, "MSE_Mean": vals.mean(), "MSE_Std": vals.std()
                     })
 
-        # 为当前数据集画图
         plot_loss_curves(current_loss_curves, dname, args.save_dir)
 
-    # --- 输出最终对比表 ---
-    print("\n" + "=" * 65)
-    print(f"{'DATASET':<12} | {'MODEL':<6} | {'NOISE':<6} | {'MSE MEAN':<12} | {'MSE STD':<10}")
-    print("-" * 65)
+    # --- 输出美化表格 ---
+    print("\n" + "=" * 85)
+    header = f"{'DATASET':<12} | {'MODEL':<8} | {'PARAMS':<10} | {'NOISE':<6} | {'MSE MEAN':<12} | {'MSE STD':<10}"
+    print(header)
+    print("-" * 85)
+
     df = pd.DataFrame(final_results)
     for _, row in df.iterrows():
         print(
-            f"{row['Dataset']:<12} | {row['Model']:<6} | {row['Noise']:<6.2f} | {row['MSE_Mean']:<12.6f} | {row['MSE_Std']:<10.6f}")
-    print("=" * 65)
-    print(f"所有 Loss 对比图已保存至: {args.save_dir}")
+            f"{row['Dataset']:<12} | {row['Model']:<8} | {row['Params']:<10,} | {row['Noise']:<6.2f} | {row['MSE_Mean']:<12.6f} | {row['MSE_Std']:<10.6f}")
+    print("=" * 85)
+    print(f"Images path: {args.save_dir}")
 
 
 if __name__ == "__main__":

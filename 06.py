@@ -90,11 +90,11 @@ def eval_one_epoch(model, loader, criterion, device):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="friedman", choices=["friedman", "concrete", "california"])
-    parser.add_argument("--fraction", type=float, default=0.05, help="训练数据比例 (0.05 - 1.0)")
+    parser.add_argument("--dataset", type=str, default="concrete", choices=["friedman", "concrete", "california"])
+    parser.add_argument("--fraction", type=float, default=0.8, help="训练数据比例 (0.1 - 1.0)")
     parser.add_argument("--runs", type=int, default=5, help="重复训练次数")
     parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--save_dir", type=str, default="./checkpoints_efficiency")
+    parser.add_argument("--save_dir", type=str, default="./checkpoints_efficiency_test_init0")
     args = parser.parse_args()
 
     os.makedirs(args.save_dir, exist_ok=True)
@@ -135,7 +135,6 @@ def main():
 
         # 3. 训练两个模型 (MLP 和 PU)
         models_to_train = [
-            ("mlp", "mlp4_h128", lambda: build_4layer_mlp(input_dim, 1, 128)),
             ("pu", "puresnet_h128", lambda: RealPUResNet1D(input_dim, 128, 1))
         ]
 

@@ -121,9 +121,9 @@ def calculate_friedman_metrics(matrix):
 # ==========================================
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save_dir", type=str, default="./checkpoints")
+    parser.add_argument("--save_dir", type=str, default="./checkpoints_test_ini0")
     parser.add_argument("--runs", type=int, default=5)
-    parser.add_argument("--seed", type=int, default=42, help="固定随机种子以保证SHAP采样一致")
+    parser.add_argument("--seed", type=int, default=17, help="固定随机种子以保证SHAP采样一致")
     args = parser.parse_args()
 
     # === 关键：设置全局种子 ===

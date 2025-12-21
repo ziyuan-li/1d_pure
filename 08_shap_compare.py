@@ -16,7 +16,7 @@ from pu_models import RealPUResNet1D
 
 
 # ==========================================
-# 1. 数据加载 (复用之前的逻辑)
+# 1. 数据加载逻辑
 # ==========================================
 def load_data(dataset_name):
     if dataset_name == "friedman":
@@ -32,11 +32,9 @@ def load_data(dataset_name):
         X, y = data.data, data.target
         feature_names = data.feature_names
 
-    # 统一划分
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=0)
     X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.50, random_state=0)
 
-    # 标准化
     x_scaler = StandardScaler()
     X_train_s = x_scaler.fit_transform(X_train)
     X_test_s = x_scaler.transform(X_test)
@@ -61,131 +59,109 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=200):
     device = next(model.parameters()).device
     predict_fn = build_predict_fn(model, device)
 
-    # 采样背景数据
-    if X_train.shape[0] > n_bg:
-        X_bg = X_train[np.random.choice(X_train.shape[0], n_bg, replace=False)]
-    else:
-        X_bg = X_train
+    # 采样
+    X_bg = X_train[np.random.choice(X_train.shape[0], min(len(X_train), n_bg), replace=False)]
+    X_eval = X_test[np.random.choice(X_test.shape[0], min(len(X_test), n_eval), replace=False)]
 
-    # 采样评估数据
-    if X_test.shape[0] > n_eval:
-        X_eval = X_test[np.random.choice(X_test.shape[0], n_eval, replace=False)]
-    else:
-        X_eval = X_test
-
-    print(f"  -> Calculating SHAP values (Background: {len(X_bg)}, Eval: {len(X_eval)})...")
+    print(f"    -> Running PermutationExplainer...")
     explainer = shap.PermutationExplainer(predict_fn, X_bg)
-    shap_values = explainer(X_eval)
+    shap_values = explainer(X_eval, silent=True)
 
-    if hasattr(shap_values, "values"):
-        phi = shap_values.values
-    else:
-        phi = np.array(shap_values)
-
+    phi = shap_values.values if hasattr(shap_values, "values") else np.array(shap_values)
     n_features = phi.shape[1]
     matrix = np.zeros((n_features, n_features))
 
-    # 计算交互强度矩阵 (近似方法，速度较快)
     for i in range(n_features):
         ranking = shap.utils.approximate_interactions(i, phi, X_eval)
         for rank, j in enumerate(ranking):
             score = n_features - rank
             matrix[i, j] = score
 
-    # 对称化并归一化
     matrix = (matrix + matrix.T) / 2.0
     if matrix.max() > 0:
         matrix /= matrix.max()
-
     return matrix
 
 
 # ==========================================
-# 3. 主程序：加载双模型并绘图
+# 3. 主程序：遍历三个数据集
 # ==========================================
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", type=str, default="friedman")
-    parser.add_argument("--run_id", type=int, default=0, help="使用哪个 Run 的模型")
-    parser.add_argument("--save_dir", type=str, default="./checkpoints")
+    parser.add_argument("--run_id", type=int, default=0)
+    parser.add_argument("--save_dir", type=str, default="./checkpoints_test_ini0")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
-    # 固定随机种子
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-
-    # 1. 准备数据
-    print(f"Loading data: {args.dataset}...")
-    X_train_s, X_test_s, feature_names = load_data(args.dataset)
-    input_dim = X_train_s.shape[1]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # 数据集列表
+    datasets = ["friedman", "concrete", "california"]
     models_config = [
         ("MLP (Baseline)", "mlp", "mlp4_h128"),
         ("PU-ResNet (Ours)", "pu", "puresnet_h128")
     ]
 
-    matrices = []
+    for ds in datasets:
+        print(f"\n{'=' * 50}\nProcessing Dataset: {ds.upper()}\n{'=' * 50}")
 
-    # 2. 计算两个模型的矩阵
-    for label, m_type, m_tag in models_config:
-        ckpt_path = os.path.join(args.save_dir, f"{m_tag}_{args.dataset}_run{args.run_id}_best.pth")
-        print(f"\nProcessing {label}...")
-
-        if not os.path.exists(ckpt_path):
-            print(f"Warning: Checkpoint not found at {ckpt_path}. Skipping.")
-            matrices.append(None)
+        try:
+            X_train_s, X_test_s, feature_names = load_data(ds)
+        except Exception as e:
+            print(f"Error loading {ds}: {e}")
             continue
 
-        ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
-        hidden_dim = ckpt["hidden_dim"]
+        input_dim = X_train_s.shape[1]
+        matrices = []
 
-        if m_type == "mlp":
-            model = build_4layer_mlp(input_dim, 1, hidden_dim)
-        else:
-            model = RealPUResNet1D(input_dim, hidden_dim, 1)
+        # 计算两个模型的矩阵
+        for label, m_type, m_tag in models_config:
+            ckpt_path = os.path.join(args.save_dir, f"{m_tag}_{ds}_run{args.run_id}_best.pth")
+            print(f"  - Model: {label}")
 
-        model.load_state_dict(ckpt["model_state_dict"])
-        model.to(device)
-        model.eval()
+            if not os.path.exists(ckpt_path):
+                print(f"    [Skip] Checkpoint not found: {ckpt_path}")
+                matrices.append(None)
+                continue
 
-        mat = get_interaction_matrix(model, X_train_s, X_test_s)
-        matrices.append(mat)
+            ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+            model = build_4layer_mlp(input_dim, 1, ckpt["hidden_dim"]) if m_type == "mlp" else \
+                RealPUResNet1D(input_dim, ckpt["hidden_dim"], 1)
 
-    # 3. 绘图 (Side-by-Side Heatmap)
-    if any(m is None for m in matrices):
-        print("Cannot plot because one or more models failed to load.")
-        return
+            model.load_state_dict(ckpt["model_state_dict"])
+            model.to(device).eval()
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+            mat = get_interaction_matrix(model, X_train_s, X_test_s)
+            matrices.append(mat)
 
-    for ax, matrix, (label, _, _) in zip(axes, matrices, models_config):
-        im = ax.imshow(matrix, cmap="viridis", origin="lower", vmin=0, vmax=1)
-        ax.set_title(label, fontsize=14, fontweight='bold')
-        ax.set_xticks(range(len(feature_names)))
-        ax.set_yticks(range(len(feature_names)))
-        ax.set_xticklabels(feature_names, rotation=45, ha='right')
-        ax.set_yticklabels(feature_names)
+        # 绘图逻辑
+        if any(m is None for m in matrices):
+            continue
 
-        # 标注Friedman的关键交互 (x0, x1) 如果是 Friedman 数据集
-        if args.dataset == "friedman":
-            # 在 (0,1) 和 (1,0) 画红框
-            import matplotlib.patches as patches
-            rect1 = patches.Rectangle((0.5, -0.5), 1, 1, linewidth=2, edgecolor='r', facecolor='none')
-            rect2 = patches.Rectangle((-0.5, 0.5), 1, 1, linewidth=2, edgecolor='r', facecolor='none')
-            # 这里坐标可能需要微调，imshow 的 grid 是以整数为中心的
-            # 更简单的做法是只在标题里提
-            pass
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+        for ax, matrix, (label, _, _) in zip(axes, matrices, models_config):
+            im = ax.imshow(matrix, cmap="viridis", origin="lower", vmin=0, vmax=1)
+            ax.set_title(label, fontsize=14, fontweight='bold')
+            ax.set_xticks(range(len(feature_names)))
+            ax.set_yticks(range(len(feature_names)))
+            ax.set_xticklabels(feature_names, rotation=45, ha='right')
+            ax.set_yticklabels(feature_names)
 
-    cbar = fig.colorbar(im, ax=axes.ravel().tolist(), label="Normalized Interaction Strength")
+        # 整体美化
+        fig.subplots_adjust(right=0.85)
+        cbar_ax = fig.add_axes([0.88, 0.15, 0.02, 0.7])
+        fig.colorbar(im, cax=cbar_ax, label="Normalized Interaction Strength")
 
-    plt.suptitle(f"Feature Interaction Analysis on {args.dataset.capitalize()} Dataset", fontsize=16)
+        plt.suptitle(f"SHAP Feature Interaction Comparison: {ds.capitalize()}", fontsize=16, y=1.02)
 
-    save_path = os.path.join(args.save_dir, f"shap_compare_{args.dataset}_run{args.run_id}.png")
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    print(f"\nFigure saved to: {save_path}")
-    plt.show()
+        save_path = os.path.join(args.save_dir, f"shap_compare_{ds}_run{args.run_id}.png")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()  # 释放内存
+        print(f"\nDone! Figure saved to: {save_path}")
+
+    print("\nAll SHAP comparisons completed.")
 
 
 if __name__ == "__main__":
