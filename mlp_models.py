@@ -1,4 +1,4 @@
-# mlp_models.py
+# mlp_models_superconductivty.py
 import torch
 import torch.nn as nn
 

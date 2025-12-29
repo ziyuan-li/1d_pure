@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 
-# 假设你已经按照上面的修改更新了 pu_models.py
+# 假设你已经按照上面的修改更新了 pu_models_superconductivty.py
 from pu_models import RealPUResNet1D
 
 

@@ -1,4 +1,4 @@
-# pu_models.py
+# pu_models_superconductivty.py
 import torch
 import torch.nn as nn
 

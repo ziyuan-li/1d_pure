@@ -17,7 +17,7 @@ class ComplexMLP4Layer(nn.Module):
     def __init__(self, input_dim: int, output_dim: int = 1, hidden_dim: int = 128):
         super().__init__()
 
-        # 结构对齐 mlp_models.py
+        # 结构对齐 mlp_models_superconductivty.py
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim, dtype=torch.complex64),
             ComplexReLU(),
