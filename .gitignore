@@ -105,3 +105,11 @@ venv.bak/
 
 # Only for this project
 .idea/
+
+# Generated checkpoints, figures, and tables
+artifacts/
+
+# Local downloads and temporary render/inspection files
+data/raw/*
+!data/raw/README.md
+tmp/
