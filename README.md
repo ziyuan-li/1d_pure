@@ -25,7 +25,7 @@ PU-ResMLP/
 |-- tests/
 |-- data/
 |   `-- raw/          # UCI datasets added for the JoCS extension
-`-- artifacts/        # Generated checkpoints and results (created on demand)
+`-- artifacts/        # Generated runs and selected result summaries
 ```
 
 ## Installation
@@ -106,16 +106,25 @@ python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0
   Parkinsons and reuses 70 full-data runs, yielding 280 curve observations.
 - The server artifact audit loads all 226 formal checkpoints and 210 new
   low-data checkpoints successfully. The 13 CV-MLP baselines on higher-order
-  synthetic data, Bike, and Parkinsons are part of that formal audit; all 43
+  synthetic data, Bike, and Parkinsons are part of that formal audit; all 48
   automated tests pass.
-- Complex-valued models now use a learnable real projection initialized as the
-  real component. This deliberately replaces the conference paper's magnitude
-  readout: targets are standardized and therefore signed, and a magnitude at a
-  zero-initialized output would block the initial gradient. Journal experiments
-  must report this corrected output head explicitly.
+- Complex-valued models use a learnable real projection initialized as the
+  real component. It supports signed standardized targets and passes gradients
+  through a zero-initialized output layer.
 
-Generated files belong in `artifacts/`; trained weights are intentionally not
-committed to regular Git history.
+## Results and repository contents
+
+The [result index](artifacts/reports/jocs_v1/README.md) lists the versioned
+experiment summaries and evaluation protocols. Training and evaluation write
+their outputs to `artifacts/`; only the selected CSV tables and protocol JSON
+files are included in Git. Checkpoints, per-run artifacts, and generated figures
+remain local. Dataset sources and loading notes are in
+[data/raw/README.md](data/raw/README.md).
+
+The repository contains experiment code, tests, dependencies, data instructions,
+and result summaries. Manuscripts, extension plans, writing notes, cover letters,
+highlights, compiled documents, and temporary files remain local and are excluded
+by `.gitignore`.
 
 ## Legacy scripts
 

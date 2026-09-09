@@ -123,7 +123,7 @@ def interaction_recovery_metrics(
 def summarize_recovery_resamples(
     records: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
-    """Summarize repeated attribution sampling without treating it as retraining."""
+    """Summarize attribution resamples from one trained checkpoint."""
 
     if not records:
         raise ValueError("recovery resample records cannot be empty")

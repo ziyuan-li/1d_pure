@@ -13,16 +13,14 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
-# 导入原有模型
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
-# 导入新增的残差 MLP 模型
 from pure_resmlp.models.residual_mlp import MLPResNet
 from pure_resmlp.paths import DATA_DIR, MAIN_REAL_CHECKPOINT_DIR
 
 
 def set_seed(seed: int):
-    """为每次 run 固定随机种子，保证可复现。"""
+    """Seed Python, NumPy, and PyTorch for one training run."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -52,7 +50,6 @@ def load_friedman():
 
 def load_concrete():
     """Concrete Strength: Train/Val/Test = 60/20/20"""
-    # 请确保数据文件路径正确
     df = pd.read_excel(DATA_DIR / "concrete+compressive+strength" / "Concrete_Data.xls")
     X = df.iloc[:, :8].values
     y = df.iloc[:, 8].values
@@ -81,7 +78,7 @@ def load_california():
 
 
 def standardize_splits(X_train, X_val, X_test, y_train, y_val, y_test):
-    """对 X, y 做标准化"""
+    """Fit feature and target scalers on training rows."""
     x_scaler = StandardScaler()
     X_train_s = x_scaler.fit_transform(X_train)
     X_val_s = x_scaler.transform(X_val)
@@ -100,7 +97,7 @@ def standardize_splits(X_train, X_val, X_test, y_train, y_val, y_test):
 def make_dataloaders(X_train, X_val, X_test,
                      y_train, y_val, y_test,
                      batch_size=128):
-    """将 numpy 数组转成 PyTorch DataLoader"""
+    """Wrap NumPy arrays in PyTorch data loaders."""
     X_train_t = torch.from_numpy(X_train).float()
     X_val_t = torch.from_numpy(X_val).float()
     X_test_t = torch.from_numpy(X_test).float()
@@ -168,7 +165,6 @@ def main():
         "--model",
         type=str,
         default="mlp_resnet",
-        # 增加了 mlp_resnet 选项
         choices=["mlp", "pu", "mlp_resnet"],
         help="选择模型类型：普通 MLP、PU 残差网络或 MLP 残差网络"
     )
@@ -187,7 +183,6 @@ def main():
 
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # 1. 加载数据
     if args.dataset == "friedman":
         X_train, X_val, X_test, y_train, y_val, y_test = load_friedman()
     elif args.dataset == "concrete":
@@ -195,7 +190,6 @@ def main():
     else:
         X_train, X_val, X_test, y_train, y_val, y_test = load_california()
 
-    # 2. 标准化
     (X_train_s, X_val_s, X_test_s,
      y_train_s, y_val_s, y_test_s,
      x_scaler, y_scaler) = standardize_splits(
@@ -203,7 +197,6 @@ def main():
         y_train, y_val, y_test
     )
 
-    # 3. DataLoader
     train_loader, val_loader, test_loader = make_dataloaders(
         X_train_s, X_val_s, X_test_s,
         y_train_s, y_val_s, y_test_s,
@@ -216,11 +209,9 @@ def main():
 
     all_test_losses = []
 
-    # 多次训练
     for run in range(args.runs):
         print(f"\n==== Run {run + 1}/{args.runs}, model={args.model}, dataset={args.dataset} ====")
 
-        # 4. 构建模型
         if args.model == "mlp":
             hidden_dim = args.hidden_dim
             model = build_4layer_mlp(
@@ -230,7 +221,6 @@ def main():
             )
             model_tag = f"mlp4_h{hidden_dim}"
         elif args.model == "mlp_resnet":
-            # 调用新设计的 MLPResNet
             hidden_dim = args.hidden_dim
             model = MLPResNet(
                 input_dim=input_dim,
@@ -238,7 +228,7 @@ def main():
                 output_dim=1
             )
             model_tag = f"mlpresnet_h{hidden_dim}"
-        else:  # PU 模型
+        else:
             hidden_dim = args.pu_hidden_dim
             model = RealPUResNet1D(
                 input_dim=input_dim,
@@ -255,7 +245,6 @@ def main():
         train_losses = []
         val_losses = []
 
-        # 5. 训练循环
         for epoch in range(1, args.epochs + 1):
             train_loss = train_one_epoch(
                 model, train_loader, criterion, optimizer, device
@@ -273,7 +262,6 @@ def main():
                     f"Epoch {epoch:03d} | train_loss={train_loss:.4f} | val_loss={val_loss:.4f}"
                 )
 
-            # 记录最优模型
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_state = {
@@ -281,7 +269,6 @@ def main():
                     for k, v in model.state_dict().items()
                 }
 
-        # 6. 测试集评估
         if best_state is not None:
             model.load_state_dict(best_state)
 
@@ -295,7 +282,6 @@ def main():
             f"Best val_loss={best_val_loss:.4f} | test_loss={test_loss:.4f}"
         )
 
-        # 7. 保存 Checkpoint
         ckpt_path = os.path.join(
             args.save_dir,
             f"{model_tag}_{args.dataset}_run{run}_best.pth"
@@ -310,7 +296,6 @@ def main():
             ckpt_path
         )
 
-        # 8. 保存 Loss 数据
         loss_path = os.path.join(
             args.save_dir,
             f"{model_tag}_{args.dataset}_run{run}_losses.npz"
@@ -321,7 +306,6 @@ def main():
             val_losses=np.array(val_losses),
         )
 
-    # 9. 统计结果
     all_test_losses = np.array(all_test_losses)
     print(f"\n==== Summary [{args.dataset}][{args.model}] over {args.runs} runs ====")
     print("Test losses:", all_test_losses)

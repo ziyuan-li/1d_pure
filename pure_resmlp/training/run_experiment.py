@@ -398,7 +398,7 @@ def grouped_regression_metrics(
     y_pred: np.ndarray,
     groups: np.ndarray,
 ) -> dict[str, dict[str, float | int]]:
-    """Report test metrics for each observed batch or gas context."""
+    """Compute regression metrics separately for each observed group."""
 
     grouped: dict[str, dict[str, float | int]] = {}
     for group in np.unique(groups):

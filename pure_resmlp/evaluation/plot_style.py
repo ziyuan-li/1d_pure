@@ -26,8 +26,7 @@ MODEL_LABELS = {
     "dcnv2_context": "DCNv2-context",
 }
 
-# Okabe-Ito-derived colors, supplemented with neutral gray and violet. Every
-# series also has a distinct marker and line pattern for grayscale reproduction.
+# Okabe-Ito-based colors, with markers and line styles to distinguish models.
 MODEL_STYLES: dict[str, dict[str, Any]] = {
     "mlp": {"color": "#6B6B6B", "marker": "o", "linestyle": "--"},
     "resmlp": {"color": "#56B4E9", "marker": "s", "linestyle": ":"},
@@ -52,7 +51,7 @@ def _font_family() -> str:
 
 
 def apply_publication_style() -> None:
-    """Apply final-size, Elsevier-compatible Matplotlib defaults."""
+    """Set figure dimensions, typography, and export defaults."""
 
     family = _font_family()
     mpl.rcParams.update(
@@ -116,7 +115,7 @@ def save_publication_figure(
     *,
     pad_inches: float = 0.03,
 ) -> None:
-    """Save editable vector artwork and high-resolution review/print copies."""
+    """Export vector figures and high-resolution raster copies."""
 
     output_dir.mkdir(parents=True, exist_ok=True)
     metadata = {"Creator": "PURe JoCS reproducible figure pipeline"}
@@ -140,8 +139,7 @@ def save_publication_figure(
         pad_inches=pad_inches,
         pil_kwargs={"compression": "tiff_lzw"},
     )
-    # Matplotlib emits RGBA TIFFs even on a white canvas.  Elsevier requests
-    # RGB artwork, so remove the redundant alpha channel without resampling.
+    # Drop the TIFF alpha channel to export RGB without resampling.
     with Image.open(tiff_path) as image:
         if image.mode != "RGB":
             image.convert("RGB").save(

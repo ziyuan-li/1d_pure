@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-SHAP interaction comparison for all four paper models.
+"""Compare SHAP-based interaction rankings across four neural models.
 
-Key changes vs your version:
-1) rank->score uses exponential decay exp(-alpha*rank) instead of linear (n_features-rank)
-   -> makes maps less uniformly filled, easier to distinguish concentration.
-2) interaction metrics support Top-K: compute entropy/HHI on only strongest K off-diagonal entries
-3) annotate plots with H_topK (and optionally HHI_topK)
-4) save richer CSV summary
-
-NOTE:
-Interaction matrix is derived from approximate_interactions ranking (not true SHAP interaction values),
-so metrics quantify concentration of the ranking-based interaction map.
+Convert approximate_interactions ranks to exp(-alpha * rank) scores and
+summarize their concentration with entropy, effective pair count, and HHI.
+Metrics use either all off-diagonal entries or the strongest top-K entries.
+These ranking scores are not SHAP interaction values.
 """
 
 import os
@@ -29,11 +22,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_friedman1, fetch_california_housing
 
-# ===== Real models =====
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
-# ===== Complex models =====
 from pure_resmlp.models.complex_mlp import build_complex_mlp
 from pure_resmlp.models.complex_pure import ComplexPUResNet1D
 from pure_resmlp.paths import (
@@ -44,9 +35,6 @@ from pure_resmlp.paths import (
 )
 
 
-# ============================================================
-# 0) Interaction metrics (Entropy + HHI) with optional Top-K
-# ============================================================
 def _offdiag_abs(mat: np.ndarray) -> np.ndarray:
     A = np.abs(np.array(mat, dtype=np.float64))
     np.fill_diagonal(A, 0.0)
@@ -54,17 +42,13 @@ def _offdiag_abs(mat: np.ndarray) -> np.ndarray:
 
 
 def _topk_mask_offdiag(A: np.ndarray, topk: Optional[int]) -> np.ndarray:
-    """
-    Return a masked version of A that keeps only topk largest off-diagonal entries (global),
-    and sets the rest to 0. If topk is None -> return A unchanged.
-    """
+    """Keep the top-K off-diagonal entries; return A unchanged if topk is None."""
     if topk is None:
         return A
 
     d = A.shape[0]
     assert A.shape == (d, d)
 
-    # flatten off-diagonal entries
     mask_off = ~np.eye(d, dtype=bool)
     vals = A[mask_off]
     if topk <= 0:
@@ -72,8 +56,6 @@ def _topk_mask_offdiag(A: np.ndarray, topk: Optional[int]) -> np.ndarray:
     if topk >= vals.size:
         return A
 
-    # find threshold for topk
-    # argpartition gives indices of topk largest values
     idx = np.argpartition(vals, -topk)[-topk:]
     keep = np.zeros_like(vals, dtype=bool)
     keep[idx] = True
@@ -112,9 +94,6 @@ def interaction_metrics(mat: np.ndarray, topk: Optional[int] = None, eps: float 
     return {"H": H, "H_norm": H_norm, "N_eff": N_eff, "HHI": HHI}
 
 
-# ============================================================
-# 1) Data loading
-# ============================================================
 def load_data(dataset_name: str):
     if dataset_name == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -142,9 +121,6 @@ def load_data(dataset_name: str):
     return X_train_s, X_test_s, feature_names
 
 
-# ============================================================
-# 2) Predict functions for SHAP
-# ============================================================
 def build_predict_fn_real(model: torch.nn.Module, device: torch.device):
     def predict_fn(X_numpy: np.ndarray) -> np.ndarray:
         X_t = torch.from_numpy(X_numpy).float().to(device)
@@ -164,9 +140,6 @@ def build_predict_fn_complex(model: torch.nn.Module, device: torch.device):
     return predict_fn
 
 
-# ============================================================
-# 3) SHAP interaction matrix (PermutationExplainer + approximate_interactions)
-# ============================================================
 def compute_interaction_matrix(
     model: torch.nn.Module,
     X_train: np.ndarray,
@@ -178,14 +151,12 @@ def compute_interaction_matrix(
     rank_decay_alpha: float = 0.6,
     per_row_topk: Optional[int] = None,
 ) -> np.ndarray:
-    """
-    Returns normalized interaction strength matrix in [0, 1].
+    """Build a normalized score matrix from approximate_interactions ranks.
 
-    - shap.PermutationExplainer for SHAP values
-    - shap.utils.approximate_interactions gives a ranking for feature interactions
-    - We convert ranking -> score via exp(-alpha*rank) to emphasize top interactions.
-
-    per_row_topk: if set, only fill top-k interactions per row (faster + sharper).
+    PermutationExplainer supplies feature attributions. Convert interaction
+    ranks to exp(-alpha * rank) scores, optionally retaining per_row_topk
+    entries per row, then symmetrize and normalize. Scores are ranking-based,
+    not SHAP interaction values.
     """
     rs = np.random.RandomState(seed)
     device = next(model.parameters()).device
@@ -225,9 +196,6 @@ def compute_interaction_matrix(
     return mat
 
 
-# ============================================================
-# 4) Load checkpoints
-# ============================================================
 def load_model_from_ckpt(
     model_kind: str,
     ckpt_path: str,
@@ -257,9 +225,6 @@ def load_model_from_ckpt(
     return model
 
 
-# ============================================================
-# 5) Plot + annotate metrics
-# ============================================================
 def plot_4panel_interactions(
     mats: List[Optional[np.ndarray]],
     titles: List[str],
@@ -333,9 +298,6 @@ def plot_4panel_interactions(
     plt.close(fig)
 
 
-# ============================================================
-# 6) Main
-# ============================================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--datasets", nargs="+", default=["friedman", "concrete", "california"])
@@ -351,13 +313,11 @@ def main():
     parser.add_argument("--n_bg", type=int, default=100)
     parser.add_argument("--n_eval", type=int, default=200)
 
-    # NEW: sharpen ranking->score
     parser.add_argument("--rank_decay_alpha", type=float, default=0.6,
                         help="exp(-alpha*rank): larger alpha => more concentrated maps")
     parser.add_argument("--per_row_topk", type=int, default=0,
                         help="keep only top-k interactions per row; 0 means keep all")
 
-    # NEW: metrics computed on top-K strongest global interactions
     parser.add_argument("--metric_topk", type=int, default=10,
                         help="compute and annotate metrics on global top-K off-diagonal entries; <=0 means full-matrix")
     parser.add_argument("--show_hhi", action="store_true", help="also annotate HHI on each panel")
@@ -437,11 +397,10 @@ def main():
             )
             mats[idx] = mat
 
-            # metrics
             m_full = interaction_metrics(mat, topk=None)
             m_topk = interaction_metrics(mat, topk=metric_topk)
 
-            # what to annotate on plot: topk version (more discriminative)
+            # Annotate the top-K concentration metrics.
             metrics_for_plot[idx] = m_topk
 
             print(f"    full: H_norm={m_full['H_norm']:.4f}, HHI={m_full['HHI']:.4f}")

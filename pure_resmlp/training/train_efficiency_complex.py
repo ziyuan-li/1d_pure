@@ -16,9 +16,6 @@ from pure_resmlp.models.complex_mlp import build_complex_mlp
 from pure_resmlp.paths import DATA_DIR, EFFICIENCY_COMPLEX_CHECKPOINT_DIR
 
 
-# ==========================================
-# 1) 数据加载（raw，不标准化）
-# ==========================================
 def load_data_raw(dataset_name):
     if dataset_name == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -33,10 +30,9 @@ def load_data_raw(dataset_name):
 
 
 def get_data_splits(X, y, fraction, seed):
-    """
-    1) 固定 Test Set: 20% (random_state=0) -> 所有实验公平
-    2) 从剩余 Train 里切 Val: 20% (random_state=0)
-    3) 对 Train 再按 fraction 采样（seed=run）
+    """Split rows 64/16/20 with seed 0, then subsample training rows.
+
+    The run seed selects the training subset; validation and test rows stay fixed.
     """
     X_train_full, X_test, y_train_full, y_test = train_test_split(
         X, y, test_size=0.20, random_state=0
@@ -58,9 +54,6 @@ def get_data_splits(X, y, fraction, seed):
     return X_train_sub, X_val_full, X_test, y_train_sub, y_val_full, y_test
 
 
-# ==========================================
-# 2) 训练/评估（复数主干 + learnable real projection）
-# ==========================================
 def forward_model(model, X_real):
     # X_real: float tensor [B, D]
     X_c = X_real.to(torch.complex64)  # imag=0
@@ -97,9 +90,6 @@ def eval_one_epoch(model, loader, criterion, device):
     return total / max(1, n)
 
 
-# ==========================================
-# 3) main
-# ==========================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default="concrete", choices=["friedman", "concrete", "california"])
@@ -123,11 +113,10 @@ def main():
 
     print(f"Start Complex Training | Dataset={args.dataset} | Fraction={args.fraction} | Runs={args.runs}")
 
-    # raw data
     X_raw, y_raw = load_data_raw(args.dataset)
     input_dim = X_raw.shape[1]
 
-    # CV-PURe is always trained; CV-MLP is enabled by default for Table 3.
+    # CV-MLP is included unless --no-train_mlp is set.
     models_to_train = [
         ("complex_pu", f"complex_pu_h{args.hidden_dim}",
          lambda: ComplexPUResNet1D(input_dim=input_dim, hidden_dim=args.hidden_dim, output_dim=1)),
@@ -137,10 +126,9 @@ def main():
                                    lambda: build_complex_mlp(input_dim=input_dim, output_dim=1, hidden_dim=args.hidden_dim)))
 
     for run in range(args.runs):
-        # split (subsample train)
         X_train, X_val, X_test, y_train, y_val, y_test = get_data_splits(X_raw, y_raw, args.fraction, seed=run)
 
-        # standardize (fit on train)
+        # Fit scalers on the selected training rows.
         x_scaler = StandardScaler().fit(X_train)
         y_scaler = StandardScaler().fit(y_train.reshape(-1, 1))
 
@@ -152,7 +140,6 @@ def main():
         y_val_s = y_scaler.transform(y_val.reshape(-1, 1)).ravel()
         y_test_s = y_scaler.transform(y_test.reshape(-1, 1)).ravel()
 
-        # dataloaders
         train_ds = TensorDataset(torch.tensor(X_train_s).float(), torch.tensor(y_train_s).float().unsqueeze(1))
         val_ds = TensorDataset(torch.tensor(X_val_s).float(), torch.tensor(y_val_s).float().unsqueeze(1))
         test_ds = TensorDataset(torch.tensor(X_test_s).float(), torch.tensor(y_test_s).float().unsqueeze(1))

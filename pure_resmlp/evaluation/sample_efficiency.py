@@ -1,25 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Sample-efficiency analysis for all four paper models.
+"""Compare sample efficiency of real- and complex-valued MLP and PURe models.
 
-Merged from:
-- 07_test_sample_efficiency.py (real-valued)
-- 17_complex_test_sample_efficiency.py (complex-valued)
-
-Purpose:
-- Unified sample efficiency analysis (Real + Complex)
-- Output publication-ready plot + tables (CSV + LaTeX)
-
-Models:
-- RV-MLP, RV-PU
-- CV-MLP, CV-PU
-
-Outputs (to --out_dir):
-- sample_efficiency_all_<dataset>.png
-- sample_efficiency_raw_<dataset>.csv          (per-run raw)
-- sample_efficiency_table_<dataset>.csv        (mean/std summary)
-- sample_efficiency_table_<dataset>.tex        (LaTeX table, booktabs, bold best per fraction)
+Write sample_efficiency_all_<dataset>.png, per-run
+sample_efficiency_raw_<dataset>.csv, and mean/SD summaries in
+sample_efficiency_table_<dataset>.csv and .tex under --out_dir.
 """
 
 import argparse
@@ -33,11 +18,9 @@ import torch.nn as nn
 from sklearn.datasets import make_friedman1, fetch_california_housing
 from sklearn.model_selection import train_test_split
 
-# ===== real =====
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
-# ===== complex =====
 from pure_resmlp.models.complex_mlp import build_complex_mlp
 from pure_resmlp.models.complex_pure import ComplexPUResNet1D
 from pure_resmlp.paths import (
@@ -48,9 +31,6 @@ from pure_resmlp.paths import (
 )
 
 
-# ============================================================
-# Data
-# ============================================================
 def load_raw_test_data(dataset: str):
     if dataset == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -68,9 +48,6 @@ def load_raw_test_data(dataset: str):
     return X_test, y_test
 
 
-# ============================================================
-# Evaluation
-# ============================================================
 def eval_real(model, X_test, y_test, sp, device) -> float:
     Xs = (X_test - sp["x_mean"]) / sp["x_scale"]
     ys = (y_test - sp["y_mean"]) / sp["y_scale"]
@@ -91,9 +68,6 @@ def eval_complex(model, X_test, y_test, sp, device) -> float:
         return float(nn.MSELoss()(pred, y_t).item())
 
 
-# ============================================================
-# LaTeX table (booktabs + bold best per fraction)
-# ============================================================
 def write_latex_table(df_sum: pd.DataFrame, out_path: str) -> None:
     """
     df_sum columns:
@@ -106,7 +80,6 @@ def write_latex_table(df_sum: pd.DataFrame, out_path: str) -> None:
 
     d = df_sum.copy()
 
-    # format cell
     def _fmt(r):
         std = r["MSE_Std"]
         if pd.isna(std):
@@ -115,13 +88,11 @@ def write_latex_table(df_sum: pd.DataFrame, out_path: str) -> None:
 
     d["Cell"] = d.apply(_fmt, axis=1)
 
-    # bold best (min mean) per fraction
     best_idx = d.groupby(["Dataset", "Fraction"])["MSE_Mean"].idxmin()
     d.loc[best_idx, "Cell"] = d.loc[best_idx, "Cell"].apply(lambda s: f"\\textbf{{{s}}}")
 
     pivot = d.pivot_table(index=["Dataset", "Fraction"], columns="Model", values="Cell", aggfunc="first")
 
-    # stable column order
     col_order = [c for c in ["RV-MLP", "RV-PURe", "CV-MLP", "CV-PURe"] if c in pivot.columns]
     pivot = pivot[col_order]
 
@@ -150,9 +121,6 @@ def write_latex_table(df_sum: pd.DataFrame, out_path: str) -> None:
         f.write("\n".join(lines) + "\n")
 
 
-# ============================================================
-# Main
-# ============================================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="concrete", choices=["friedman", "concrete", "california"])
@@ -172,20 +140,17 @@ def main():
     fractions = [float(x) for x in args.fractions.split(",")]
     X_test, y_test = load_raw_test_data(args.dataset)
 
-    # for plotting (mean/std per fraction)
     results = {
         "RV-MLP": [], "RV-PURe": [],
         "CV-MLP": [], "CV-PURe": []
     }
 
-    # for tables (raw per run)
     rows = []
 
     for frac in fractions:
         buf = {k: [] for k in results}
 
         for run in range(args.runs):
-            # ---------- real ----------
             for key, tag, builder in [
                 ("RV-MLP", "mlp4_h128", lambda d: build_4layer_mlp(d, 1, 128)),
                 ("RV-PURe", "puresnet_h128", lambda d: RealPUResNet1D(d, 128, 1)),
@@ -219,7 +184,6 @@ def main():
                     "TestMSE": float(val),
                 })
 
-            # ---------- complex ----------
             for key, tag, builder in [
                 ("CV-MLP", f"complex_mlp_h{args.hidden_dim}",
                  lambda d: build_complex_mlp(d, 1, args.hidden_dim)),
@@ -255,7 +219,6 @@ def main():
                     "TestMSE": float(val),
                 })
 
-        # aggregate for plotting
         for k in results:
             arr = np.array(buf[k], dtype=float)
             if arr.size == 0:
@@ -263,9 +226,6 @@ def main():
             else:
                 results[k].append((float(np.mean(arr)), float(np.std(arr, ddof=0))))
 
-    # ========================================================
-    # Tables: raw + summary
-    # ========================================================
     df_raw = pd.DataFrame(rows)
     raw_path = os.path.join(args.out_dir, f"sample_efficiency_raw_{args.dataset}.csv")
     df_raw.to_csv(raw_path, index=False)
@@ -283,38 +243,32 @@ def main():
     tex_path = os.path.join(args.out_dir, f"sample_efficiency_table_{args.dataset}.tex")
     write_latex_table(df_sum, tex_path)
 
-    # ========================================================
-    # Plot (PNG)
-    # ========================================================
     plt.figure(figsize=(10, 6))
     x = np.array(fractions) * 100
 
-    # Match merge_eval_pub.py default color cycle order (C0,C1,C2,C3)
+    # Use the same model colors as performance_robustness.py.
     style = {
-        "RV-MLP": dict(color="C0", ls="--", marker="o"),  # model 1
-        "RV-PURe": dict(color="C1", ls="-", marker="s"),  # model 2
-        "CV-MLP": dict(color="C2", ls="--", marker="o"),  # model 3
-        "CV-PURe": dict(color="C3", ls="-", marker="s"),  # model 4
+        "RV-MLP": dict(color="C0", ls="--", marker="o"),
+        "RV-PURe": dict(color="C1", ls="-", marker="s"),
+        "CV-MLP": dict(color="C2", ls="--", marker="o"),
+        "CV-PURe": dict(color="C3", ls="-", marker="s"),
     }
 
     for k in results:
         m = np.array([v[0] for v in results[k]], dtype=float)
         s = np.array([v[1] for v in results[k]], dtype=float)
 
-        # skip if everything is nan
         if np.all(np.isnan(m)):
             continue
 
         plt.plot(x, m, lw=2, label=k, **style[k])
 
-        # optional band only if std is available
         ok = ~np.isnan(m) & ~np.isnan(s)
         if np.any(ok):
             plt.fill_between(x[ok], (m - s)[ok], (m + s)[ok], alpha=0.12, color=style[k]["color"])
 
     plt.xlabel("Training Data Percentage (%)", fontsize=13)
     plt.ylabel("Test MSE (Standardized)", fontsize=13)
-    # plt.title(f"Sample Efficiency Comparison ({args.dataset.upper()})", fontsize=15)
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.legend(fontsize=11)
 

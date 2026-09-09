@@ -1,4 +1,4 @@
-"""Summarize the compact JoCS sample-efficiency experiment."""
+"""Summarize the JoCS sample-efficiency results."""
 
 from __future__ import annotations
 

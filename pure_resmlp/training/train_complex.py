@@ -12,7 +12,6 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 
-# 导入复数模型
 from pure_resmlp.models.complex_pure import ComplexPUResNet1D
 from pure_resmlp.models.complex_mlp import build_complex_mlp
 from pure_resmlp.paths import DATA_DIR, MAIN_COMPLEX_CHECKPOINT_DIR
@@ -28,7 +27,6 @@ def set_seed(seed: int):
     torch.backends.cudnn.benchmark = False
 
 
-# --- 数据加载逻辑 (已对齐 01.py) ---
 def load_friedman():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     return train_test_split_all(X, y, test_size=0.30)
@@ -75,7 +73,6 @@ def make_dataloaders(X_train, X_val, X_test, y_train, y_val, y_test, batch_size=
     )
 
 
-# --- 训练与评估逻辑 ---
 def train_one_epoch(model, loader, criterion, optimizer, device):
     model.train()
     total_loss = 0.0
@@ -102,13 +99,12 @@ def eval_one_epoch(model, loader, criterion, device):
     return total_loss / len(loader.dataset)
 
 
-# --- 主程序 ---
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default="friedman", choices=["friedman", "concrete", "california"])
-    parser.add_argument("--model", type=str, default="complex_mlp", choices=["complex_pu", "complex_mlp"])  # 增加模型选择
+    parser.add_argument("--model", type=str, default="complex_mlp", choices=["complex_pu", "complex_mlp"])
     parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--hidden_dim", type=int, default=64)  # 对齐 01.py 默认值
+    parser.add_argument("--hidden_dim", type=int, default=64)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--runs", type=int, default=5)
@@ -135,7 +131,6 @@ def main():
     for run in range(args.runs):
         print(f"\n==== Run {run + 1}/{args.runs}, model={args.model}, dataset={args.dataset} ====")
 
-        # 动态初始化模型逻辑
         if args.model == "complex_pu":
             model = ComplexPUResNet1D(input_dim=input_dim, hidden_dim=args.hidden_dim).to(device)
             model_tag = f"complex_pu_h{args.hidden_dim}"
@@ -168,7 +163,6 @@ def main():
         all_test_losses.append(test_loss)
         print(f"Best Val Loss: {best_val_loss:.4f} | Test Loss: {test_loss:.4f}")
 
-        # 保存结果
         ckpt_path = os.path.join(args.save_dir, f"{model_tag}_{args.dataset}_run{run}_best.pth")
         torch.save(
             {

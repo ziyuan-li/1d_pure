@@ -1,4 +1,4 @@
-"""Dataset definitions and leakage-safe preprocessing for the JoCS study."""
+"""Dataset loading, splitting, and training-only preprocessing."""
 
 from __future__ import annotations
 
@@ -452,12 +452,11 @@ def subset_prepared_training_data(
     subset_seed: int = 0,
     group_metadata_key: str | None = None,
 ) -> PreparedData:
-    """Create a leakage-safe, nested training subset from prepared data.
+    """Select nested training subsets while keeping validation and test rows fixed.
 
-    Validation and test membership remain fixed.  Feature and target scalers are
-    refit using only the selected training rows.  When ``group_metadata_key`` is
-    supplied, every observed training group contributes at least one row and
-    deterministic per-group prefixes make fractions nested.
+    Refit feature and target scalers on the selected rows. With
+    group_metadata_key, retain every training group and take deterministic
+    per-group prefixes to keep fractions nested.
     """
 
     if not 0.0 < fraction <= 1.0:

@@ -1,4 +1,4 @@
-"""Reproducible, non-overwriting experiment artifact recording."""
+"""Experiment configurations, artifacts, and completion manifests."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 
 @dataclass(frozen=True)
 class RunConfig:
-    """Minimal identity and hyperparameters for one reproducible run."""
+    """Run identity and hyperparameters."""
 
     experiment: str
     dataset: str

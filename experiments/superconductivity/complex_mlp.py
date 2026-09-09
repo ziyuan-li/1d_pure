@@ -1,25 +1,18 @@
-# complex_mlp_models.py
 import torch
 import torch.nn as nn
 
 from pure_resmlp.models.complex_readout import ComplexRealProjection
 
 class ComplexReLU(nn.Module):
-    """
-    复数 ReLU (CReLU): 分别对实部和虚部取 ReLU
-    """
+    """Apply ReLU separately to real and imaginary components."""
     def forward(self, z):
         return torch.complex(torch.relu(z.real), torch.relu(z.imag))
 
 class ComplexMLP4Layer(nn.Module):
-    """
-    复数版本的 MLP：
-    所有线性层均使用 torch.complex64
-    """
+    """Seven complex hidden affine layers with CReLU and a real-valued readout."""
     def __init__(self, input_dim: int, output_dim: int = 1, hidden_dim: int = 128):
         super().__init__()
 
-        # 结构对齐 mlp_models_superconductivty.py
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim, dtype=torch.complex64),
             ComplexReLU(),

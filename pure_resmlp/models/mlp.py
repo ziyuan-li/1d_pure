@@ -4,11 +4,9 @@ import torch.nn as nn
 
 
 class MLP4Layer(nn.Module):
-    """
-    Historical ``MLP4Layer`` baseline used by the experiments.
+    """Seven ReLU hidden layers followed by a linear output.
 
-    The class name is retained for checkpoint compatibility; the implementation
-    contains seven hidden linear layers followed by the output layer.
+    The historical class name is retained for checkpoint compatibility.
     """
     def __init__(self, input_dim: int, output_dim: int = 1,
                  hidden_dim: int = 128):
@@ -39,9 +37,7 @@ class MLP4Layer(nn.Module):
 def build_4layer_mlp(input_dim: int,
                      output_dim: int = 1,
                      hidden_dim: int = 128) -> nn.Module:
-    """
-    返回一个四层 MLP 模型，方便在训练脚本中直接调用
-    """
+    """Build the seven-hidden-layer MLP baseline."""
     return MLP4Layer(input_dim=input_dim,
                      output_dim=output_dim,
                      hidden_dim=hidden_dim)

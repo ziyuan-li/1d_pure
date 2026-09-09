@@ -1,4 +1,4 @@
-"""Context-aware baselines used by the Bike Sharing experiment."""
+"""Context-aware regression baselines."""
 
 from __future__ import annotations
 

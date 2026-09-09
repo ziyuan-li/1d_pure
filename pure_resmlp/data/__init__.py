@@ -1,4 +1,4 @@
-"""Unified dataset loading and preprocessing for JoCS experiments."""
+"""Dataset loading and preprocessing."""
 
 from pure_resmlp.data.datasets import (
     PreparedData,

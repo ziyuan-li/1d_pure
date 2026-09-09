@@ -73,7 +73,7 @@ SUITES = (
 
 
 def continuous_ordinary_columns(data: Any) -> np.ndarray:
-    """Return continuous ordinary columns, leaving context/one-hot columns intact."""
+    """Select ordinary columns with more than two distinct training values."""
 
     ordinary = {
         index

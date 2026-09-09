@@ -1,7 +1,5 @@
-# 01.py
-# Train script (Superconductivity regression) with multiple selectable networks.
-# - Keep dataset split reproducible via --split_seed
-# - Remove model initialization seeding (weights differ each run)
+# Superconductivity regression with selectable real and complex networks.
+# The split seed is fixed; model initialization and minibatch order are unseeded.
 
 import argparse
 import os
@@ -14,7 +12,6 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-# Models
 from experiments.superconductivity.mlp import build_4layer_mlp
 from experiments.superconductivity.pure import RealPUResNet1D
 from experiments.superconductivity.complex_pure import ComplexPUResNet1D
@@ -28,18 +25,7 @@ DEFAULT_CHECKPOINT_DIR = ARTIFACTS_DIR / "checkpoints" / "superconductivity"
 
 
 def load_superconductivity_data(data_dir: str = str(DEFAULT_DATA_DIR), split_seed: int = 42):
-    """
-    Load Superconductivity dataset and do a FIXED split with split_seed.
-
-    Logic:
-      1) Read train.csv (or superconduct.csv)
-      2) Split Test (20%)
-      3) Split Val from remaining (20% of 80%) -> Train is 64%
-
-    Note:
-      - This split is reproducible across runs due to random_state=split_seed.
-      - We intentionally do NOT set torch/np seeds for model initialization.
-    """
+    """Load superconductivity data with a 64/16/20 split controlled by split_seed."""
     paths = [
         os.path.join(data_dir, "train.csv"),
         os.path.join(data_dir, "superconduct.csv"),
@@ -61,12 +47,10 @@ def load_superconductivity_data(data_dir: str = str(DEFAULT_DATA_DIR), split_see
     X = df.iloc[:, :-1].values
     y = df.iloc[:, -1].values
 
-    # 1) Test split (20%)
     X_train_full, X_test, y_train_full, y_test = train_test_split(
         X, y, test_size=0.20, random_state=split_seed
     )
 
-    # 2) Val split (20% of remaining)
     X_train, X_val, y_train, y_val = train_test_split(
         X_train_full, y_train_full, test_size=0.20, random_state=split_seed
     )
@@ -84,19 +68,17 @@ def make_dataloaders(
     X_train, X_val, X_test, y_train, y_val, y_test, batch_size: int = 128
 ):
     """Standardize X/y and wrap into PyTorch DataLoaders."""
-    # X standardization (fit on train only)
+    # Fit input and target scalers on training rows.
     x_scaler = StandardScaler()
     X_train_s = x_scaler.fit_transform(X_train)
     X_val_s = x_scaler.transform(X_val)
     X_test_s = x_scaler.transform(X_test)
 
-    # y standardization (very helpful for regression convergence)
     y_scaler = StandardScaler()
     y_train_s = y_scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
     y_val_s = y_scaler.transform(y_val.reshape(-1, 1)).ravel()
     y_test_s = y_scaler.transform(y_test.reshape(-1, 1)).ravel()
 
-    # to tensors
     train_ds = TensorDataset(
         torch.tensor(X_train_s, dtype=torch.float32),
         torch.tensor(y_train_s, dtype=torch.float32).unsqueeze(1),
@@ -110,9 +92,7 @@ def make_dataloaders(
         torch.tensor(y_test_s, dtype=torch.float32).unsqueeze(1),
     )
 
-    # loaders
-    # NOTE: shuffle=True will be non-deterministic across runs (intended),
-    # because we removed global seeds for model initialization.
+    # No global seed is set, so minibatch order varies across runs.
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_size * 2, shuffle=False)
     test_loader = DataLoader(test_ds, batch_size=batch_size * 2, shuffle=False)
@@ -125,15 +105,7 @@ def count_params(model: nn.Module) -> int:
 
 
 def build_model(model_name: str, input_dim: int, hidden_dim: int, output_dim: int = 1) -> nn.Module:
-    """
-    Factory to build different architectures.
-
-    model_name choices:
-      - mlp
-      - real_pu
-      - complex_mlp
-      - complex_pu
-    """
+    """Build the selected real- or complex-valued MLP or PURe model."""
     if model_name == "mlp":
         print("Model: Real-valued MLP (build_4layer_mlp)")
         return build_4layer_mlp(input_dim=input_dim, output_dim=output_dim, hidden_dim=hidden_dim)
@@ -244,10 +216,9 @@ def main():
     parser.add_argument("--hidden_dim", type=int, default=128, help="hidden dim for networks")
     parser.add_argument("--save_dir", type=str, default=str(DEFAULT_CHECKPOINT_DIR))
 
-    # Keep ONLY the split seed
+    # This seed controls the split, not model initialization.
     parser.add_argument("--split_seed", type=int, default=42, help="seed for dataset split only")
 
-    # Choose model
     parser.add_argument(
         "--model",
         type=str,
@@ -266,19 +237,16 @@ def main():
 
     is_complex_model = args.model in ["complex_mlp", "complex_pu"]
 
-    # 1) load data with fixed split seed
     X_train, X_val, X_test, y_train, y_val, y_test = load_superconductivity_data(
         data_dir=args.data_dir,
         split_seed=args.split_seed,
     )
     input_dim = X_train.shape[1]
 
-    # 2) loaders
     train_loader, val_loader, test_loader, y_scaler = make_dataloaders(
         X_train, X_val, X_test, y_train, y_val, y_test, batch_size=args.batch_size
     )
 
-    # 3) build model (unseeded init)
     model = build_model(
         model_name=args.model,
         input_dim=input_dim,
@@ -291,7 +259,6 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     criterion = nn.MSELoss()  # MSE in standardized space
 
-    # 4) training loop
     best_val_loss = float("inf")
     ckpt_name = f"best_{args.model}_hidden{args.hidden_dim}_split{args.split_seed}.pth"
     best_ckpt_path = os.path.join(args.save_dir, ckpt_name)
@@ -330,7 +297,6 @@ def main():
     print(f"\nTraining done. Best Val Loss: {best_val_loss:.6f}")
     print(f"Best checkpoint saved to: {best_ckpt_path}")
 
-    # 5) load best model and evaluate on test set (RMSE in Kelvin)
     checkpoint = torch.load(best_ckpt_path, map_location=device)
     model.load_state_dict(checkpoint["model_state_dict"])
 

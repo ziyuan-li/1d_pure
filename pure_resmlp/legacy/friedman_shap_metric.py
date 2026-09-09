@@ -1,4 +1,3 @@
-# 04_friedman_metric.py
 import os
 import argparse
 import numpy as np
@@ -14,9 +13,6 @@ from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
 
-# ==========================================
-# 1. 数据加载
-# ==========================================
 def load_friedman_data():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     X_train, X_temp, y_train, y_temp = train_test_split(
@@ -31,9 +27,6 @@ def load_friedman_data():
     return X_train_s, X_test_s
 
 
-# ==========================================
-# 2. SHAP 计算逻辑
-# ==========================================
 def build_predict_fn(model, device):
     def predict_fn(X_numpy):
         X_t = torch.from_numpy(X_numpy).float().to(device)
@@ -48,7 +41,7 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=300):
     device = next(model.parameters()).device
     predict_fn = build_predict_fn(model, device)
 
-    # 这里的随机选择现在受到 main 函数里 seed 的控制
+    # Sampling uses the global NumPy seed set in main().
     if X_train.shape[0] > n_bg:
         idx_bg = np.random.choice(X_train.shape[0], n_bg, replace=False)
         X_bg = X_train[idx_bg]
@@ -87,7 +80,7 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=300):
 
 def calculate_friedman_metrics(matrix):
     n = matrix.shape[0]
-    target_score = matrix[0, 1]  # Friedman: x0-x1 is the key
+    target_score = matrix[0, 1]  # Ground-truth interaction: x0 and x1.
 
     other_scores = []
     for i in range(n):
@@ -98,7 +91,6 @@ def calculate_friedman_metrics(matrix):
 
     max_other = max(other_scores) if other_scores else 0.0
 
-    # 排名
     all_pairs = []
     for i in range(n):
         for j in range(i + 1, n):
@@ -116,9 +108,6 @@ def calculate_friedman_metrics(matrix):
     return target_score, rank, ratio
 
 
-# ==========================================
-# 3. 主流程
-# ==========================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--save_dir", type=str, default="./checkpoints_test_ini0")
@@ -126,12 +115,11 @@ def main():
     parser.add_argument("--seed", type=int, default=17, help="固定随机种子以保证SHAP采样一致")
     args = parser.parse_args()
 
-    # === 关键：设置全局种子 ===
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     print(f"Random seed set to: {args.seed}")
 
-    input_dim = 10  # Friedman
+    input_dim = 10
     X_train_s, X_test_s = load_friedman_data()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

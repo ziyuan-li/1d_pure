@@ -1,4 +1,4 @@
-"""Generate the publication-ready core result figures for the JoCS extension."""
+"""Generate the main JoCS result figures."""
 
 from __future__ import annotations
 
@@ -74,6 +74,7 @@ def figure1_synthetic(report_dir: Path) -> None:
             "Mean rank of true interactions ↓",
         )
         axes[0, column].set_title(title, loc="left", fontweight="bold")
+        axes[1, column].set_title(title, loc="left", fontweight="bold")
 
     for label, axis in zip("abcd", axes.flat, strict=True):
         panel_label(axis, label)

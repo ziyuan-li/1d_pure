@@ -1,0 +1,28 @@
+{
+  "noise_space": "standardized feature space",
+  "perturbed_columns": "continuous ordinary features only; context and binary one-hot columns fixed",
+  "noise_levels": [
+    0.0,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "corruption_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "aggregation": "corruption seeds averaged within training seed; uncertainty across training seeds",
+  "primary_metric": "performance_auc: interval-average target-SD-normalized noisy RMSE; lower is better",
+  "secondary_metric": "degradation_auc: interval-average target-SD-normalized RMSE increase from clean; lower is better",
+  "dataset_weighting": "equal within scientific and context suites"
+}

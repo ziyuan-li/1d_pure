@@ -1,22 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Performance and robustness analysis for all four paper models.
+"""Evaluate prediction error and input-noise sensitivity for four neural models.
 
-Merged from:
-- 02.py (real-valued evaluator)
-- 12_complex.py (complex-valued evaluator)
+Write per-run results.csv, results_table.tex, loss_<dataset>.png, and
+mse_<dataset>.png under --out_dir. Loss curves show mean training and
+validation error; noise curves show test MSE with error bars.
 
-Generates publication-ready tables + figures.
-
-Outputs (to --out_dir):
-- results.csv (tidy)
-- results_table.tex (LaTeX table, booktabs, bold best)
-- loss_<dataset>.png (train + val loss curves, mean over runs, log10; no shading)
-- mse_<dataset>.png (test MSE vs noise, error bars)
-
-Example:
-python -m pure_resmlp.evaluation.performance_robustness
+Run with python -m pure_resmlp.evaluation.performance_robustness.
 """
 
 import argparse
@@ -44,9 +34,6 @@ from pure_resmlp.paths import (
 )
 
 
-# -----------------------------
-# Helpers
-# -----------------------------
 def count_parameters(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
@@ -129,9 +116,6 @@ def _stack_runs(curves: List[np.ndarray]) -> Optional[np.ndarray]:
     return np.stack([s[:min_len] for s in series], axis=0)
 
 
-# -----------------------------
-# Model registry
-# -----------------------------
 @dataclass(frozen=True)
 class ModelSpec:
     name: str
@@ -151,7 +135,7 @@ def get_model_specs(hidden_dim: int) -> List[ModelSpec]:
 
 
 def build_model(spec: ModelSpec, input_dim: int, out_dim: int, h_dim: int) -> nn.Module:
-    """Import + build the correct model."""
+    """Build the model selected by its registry name."""
     if spec.family == "real":
         from pure_resmlp.models.mlp import build_4layer_mlp
         from pure_resmlp.models.pure import RealPUResNet1D
@@ -172,19 +156,10 @@ def ckpt_paths(base_dir: str, tag: str, dataset: str, run: int) -> Tuple[str, st
     return ckpt, loss
 
 
-# -----------------------------
-# Plotting (PNG only)
-# -----------------------------
 def plot_loss_curves(loss_curves: Dict[str, Dict[str, List[np.ndarray]]],
                      dataset: str,
                      out_dir: str) -> None:
-    """
-    Plot train + val loss (mean over runs), log10 scale.
-    Same model -> same color:
-      - Val: solid line
-      - Train: dashed line
-    No shading. PNG only.
-    """
+    """Plot mean log10 loss with solid validation and dashed training curves."""
 
     LABEL_MAP = {
         "rv_mlp": "RV-MLP",
@@ -204,17 +179,15 @@ def plot_loss_curves(loss_curves: Dict[str, Dict[str, List[np.ndarray]]],
 
         color = None
 
-        # --- validation (solid) ---
         if S_val is not None:
             mean_val = np.mean(S_val, axis=0)
             x = np.arange(1, len(mean_val) + 1)
             y = np.log10(mean_val + 1e-12)
 
             (line_val,) = plt.plot(x, y, linestyle="-", label=f"{label_base} (val)")
-            color = line_val.get_color()  # <-- capture color
+            color = line_val.get_color()
             plotted += 1
 
-        # --- training (dashed, same color) ---
         if S_tr is not None:
             mean_tr = np.mean(S_tr, axis=0)
             x = np.arange(1, len(mean_tr) + 1)
@@ -233,7 +206,6 @@ def plot_loss_curves(loss_curves: Dict[str, Dict[str, List[np.ndarray]]],
 
     plt.xlabel("Epoch")
     plt.ylabel(r"$\log_{10}$ (MSE)")
-    # plt.title(f"Training & validation loss on {dataset.upper()}")
     plt.grid(True, alpha=0.3)
     plt.legend(ncol=2, fontsize=9)
     plt.tight_layout()
@@ -272,9 +244,6 @@ def plot_test_mse_vs_noise(df: pd.DataFrame, dataset: str, out_dir: str) -> None
     plt.close()
 
 
-# -----------------------------
-# LaTeX table (booktabs + bold best)
-# -----------------------------
 def make_latex_table(df: pd.DataFrame, out_path: str) -> None:
     if df.empty:
         with open(out_path, "w", encoding="utf-8") as f:
@@ -304,7 +273,6 @@ def make_latex_table(df: pd.DataFrame, out_path: str) -> None:
          for m in col_order]
     )
 
-    # NOTE: caption braces are correctly closed here.
     lines.append(
         "\\caption{Test MSE (mean $\\pm$ std over runs). Best per dataset/noise is in bold. "
         f"Parameter counts: {param_str}.}}"
@@ -326,9 +294,6 @@ def make_latex_table(df: pd.DataFrame, out_path: str) -> None:
         f.write("\n".join(lines) + "\n")
 
 
-# -----------------------------
-# Main
-# -----------------------------
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--real_dir", type=str, default=str(MAIN_REAL_CHECKPOINT_DIR))
@@ -356,7 +321,6 @@ def main():
     }
 
     for dname in datasets:
-        # load dataset
         try:
             if dname == "friedman":
                 data_splits = load_friedman()
@@ -371,7 +335,7 @@ def main():
         X_train_s, X_val_s, X_test_s, y_train_s, y_val_s, y_test_s = standardize_splits(*data_splits)
         input_dim = X_train_s.shape[1]
 
-        # fixed noise samples (for fairness across models)
+        # Reuse the same noise samples across models.
         rng = np.random.RandomState(123)
         test_noises = {
             std: (np.zeros_like(X_test_s) if std == 0.0 else rng.normal(0, std, X_test_s.shape))
@@ -399,7 +363,6 @@ def main():
                 if param_count is None:
                     param_count = count_parameters(model)
 
-                # test eval across noises
                 for std in noise_stds:
                     X_noisy = torch.from_numpy(X_test_s + test_noises[std]).float()
                     y_true = torch.from_numpy(y_test_s).float().unsqueeze(-1)
@@ -410,7 +373,6 @@ def main():
                     )
                     run_metrics[std].append(eval_on_test(model, loader, device, is_complex=spec.is_complex))
 
-                # loss curves
                 lc = read_loss_npz(loss_path)
                 if lc is not None:
                     tr, va = lc
@@ -420,7 +382,6 @@ def main():
             if param_count is None:
                 continue
 
-            # aggregate
             for std in noise_stds:
                 vals = np.asarray(run_metrics[std], dtype=float)
                 if vals.size == 0:
@@ -437,17 +398,13 @@ def main():
                     "RunsUsed": int(vals.size),
                 })
 
-        # per-dataset loss plot (train + val)
         plot_loss_curves(all_loss_curves[dname], dname, args.out_dir)
 
-    # Save tidy results
     df = pd.DataFrame(final_rows)
     df.to_csv(os.path.join(args.out_dir, "results.csv"), index=False)
 
-    # LaTeX table
     make_latex_table(df, os.path.join(args.out_dir, "results_table.tex"))
 
-    # Robustness plots
     for dname in df["Dataset"].unique():
         plot_test_mse_vs_noise(df, dname, args.out_dir)
 

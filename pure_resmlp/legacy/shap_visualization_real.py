@@ -1,4 +1,3 @@
-# 03_shap_viz.py
 import os
 import argparse
 import numpy as np
@@ -16,7 +15,6 @@ from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
 
-# ========= 1. 数据加载 =========
 
 def load_friedman():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -66,7 +64,6 @@ def standardize_splits(X_train, X_val, X_test, y_train, y_val, y_test):
     return (X_train_s, X_val_s, X_test_s, y_train_s, y_val_s, y_test_s, x_scaler, y_scaler)
 
 
-# ========= 2. SHAP 交互矩阵计算 =========
 
 def build_predict_fn(model, device):
     def predict_fn(X_numpy):
@@ -82,7 +79,7 @@ def compute_shap_interaction_matrix(model, X_train, X_test, max_background=100, 
     device = next(model.parameters()).device
     predict_fn = build_predict_fn(model, device)
 
-    # 注意：这里的随机选择受全局 seed 控制，所以结果是固定的
+    # Sampling uses the global NumPy seed set in main().
     if X_train.shape[0] > max_background:
         bg_idx = np.random.choice(X_train.shape[0], max_background, replace=False)
         X_bg = X_train[bg_idx]
@@ -143,7 +140,6 @@ def plot_interaction_heatmap(interaction_matrix, feature_names=None, title="SHAP
     plt.show()
 
 
-# ========= 3. 主函数 =========
 
 def main():
     parser = argparse.ArgumentParser()
@@ -154,12 +150,10 @@ def main():
     parser.add_argument("--save_dir", type=str, default="./checkpoints")
     args = parser.parse_args()
 
-    # === 关键：设置全局种子 ===
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     print(f"Random seed set to: {args.seed}")
 
-    # 加载数据
     if args.dataset == "friedman":
         X_train, X_val, X_test, y_train, y_val, y_test = load_friedman()
         feature_names = [f"x{i}" for i in range(10)]
@@ -177,7 +171,6 @@ def main():
     input_dim = X_train_s.shape[1]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # 确定模型 Tag
     if args.model == "mlp":
         model_tag = "mlp4_h128"
     else:
@@ -190,7 +183,7 @@ def main():
         return
 
     print(f"Loading checkpoint: {ckpt_path}")
-    # 添加 weights_only=False 以兼容 numpy 数据
+    # These project checkpoints include NumPy scaler arrays.
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
 
     hidden_dim = ckpt["hidden_dim"]
@@ -205,12 +198,10 @@ def main():
     model.to(device)
     model.eval()
 
-    # 计算矩阵
     interaction_matrix = compute_shap_interaction_matrix(
         model, X_train_s, X_test_s, max_background=100, eval_samples=300
     )
 
-    # 画图
     title = f"SHAP Interaction ({args.dataset.capitalize()}, {args.model.upper()}, Run {args.run_id})"
     save_path = os.path.join(args.save_dir,
                              f"shap_heatmap_{args.dataset}_{args.model}_run{args.run_id}_seed{args.seed}.png")

@@ -1,4 +1,3 @@
-# 07_test_sample_efficiency.py
 import argparse
 import os
 import numpy as np
@@ -12,7 +11,6 @@ from matplotlib.lines import Line2D
 import torch
 import torch.nn as nn
 
-# 假设 mlp_models 和 pu_models 在当前路径
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
@@ -96,7 +94,6 @@ def main():
                 mse = evaluate_model(model, X_test, y_test, scaler_params, device)
                 loss_buffer[m_key].append(mse)
 
-        # 统计计算
         mlp_raw = np.array(loss_buffer["mlp"])
         pu_raw = np.array(loss_buffer["pu"])
 
@@ -108,7 +105,6 @@ def main():
         results["pu"]["means"].append(m_pu)
         results["pu"]["stds"].append(s_pu)
 
-        # [修改] 计算 Difference 和 P-Value
         diff = m_mlp - m_pu if not np.isnan(m_mlp) and not np.isnan(m_pu) else np.nan
         p_val_val = np.nan
         sig_str = "N/A"
@@ -129,16 +125,13 @@ def main():
             "Sig.": sig_str
         })
 
-    # --- 打印增强版汇总表格 ---
     print("\n" + "=" * 30 + " FINAL STATISTICAL SUMMARY " + "=" * 30)
     df_summary = pd.DataFrame(summary_data)
-    # 设置显示选项确保不被截断
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', 1000)
     print(df_summary.to_string(index=False))
     print("=" * 87)
 
-    # === 绘图逻辑 ===
     plt.figure(figsize=(10, 6))
     x_axis = np.array(fractions) * 100
     mlp_m, mlp_s = np.array(results["mlp"]["means"]), np.array(results["mlp"]["stds"])
@@ -150,7 +143,6 @@ def main():
     plt.plot(x_axis, pu_m, 's-', label="PU-ResNet (Ours)", color="tab:red", lw=2)
     plt.fill_between(x_axis, pu_m - pu_s, pu_m + pu_s, color="tab:red", alpha=0.15)
 
-    # 标注星号
     has_star = False
     for i, frac in enumerate(fractions):
         if frac in p_values_dict and p_values_dict[frac] < 0.05:

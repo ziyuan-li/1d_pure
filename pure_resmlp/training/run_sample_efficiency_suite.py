@@ -1,4 +1,4 @@
-"""Run the compact JoCS sample-efficiency grid across available GPUs."""
+"""Distribute the sample-efficiency grid across GPUs."""
 
 from __future__ import annotations
 

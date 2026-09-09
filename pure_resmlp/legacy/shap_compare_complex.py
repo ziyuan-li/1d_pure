@@ -1,4 +1,3 @@
-# 18_shap_compare_complex.py
 import os
 import argparse
 import numpy as np
@@ -10,14 +9,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_friedman1, fetch_california_housing
 
-# 复数模型
 from pure_resmlp.models.complex_pure import ComplexPUResNet1D
 from pure_resmlp.models.complex_mlp import build_complex_mlp
 
 
-# ==========================================
-# 1. 数据加载逻辑（与 08 对齐）
-# ==========================================
 def load_data(dataset_name):
     if dataset_name == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -42,13 +37,10 @@ def load_data(dataset_name):
     return X_train_s, X_test_s, feature_names
 
 
-# ==========================================
-# 2. SHAP 预测函数（复数输入：imag=0，输出取 real）
-# ==========================================
 def build_predict_fn_complex(model, device):
     def predict_fn(X_numpy):
         X_t = torch.from_numpy(X_numpy).float().to(device)
-        # 复数模型：把实特征转为 complex64（虚部为 0）
+        # Embed real features with zero imaginary components.
         X_c = X_t.to(torch.complex64)
         with torch.no_grad():
             y = model(X_c).detach().cpu().numpy().ravel()
@@ -61,7 +53,6 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=200):
     device = next(model.parameters()).device
     predict_fn = build_predict_fn_complex(model, device)
 
-    # 采样背景与评估点
     X_bg = X_train[np.random.choice(X_train.shape[0], min(len(X_train), n_bg), replace=False)]
     X_eval = X_test[np.random.choice(X_test.shape[0], min(len(X_test), n_eval), replace=False)]
 
@@ -79,26 +70,22 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=200):
             score = n_features - rank
             matrix[i, j] = score
 
-    # 对称化 + 归一化
+    # Symmetrize and normalize the ranking scores.
     matrix = (matrix + matrix.T) / 2.0
     if matrix.max() > 0:
         matrix /= matrix.max()
     return matrix
 
 
-# ==========================================
-# 3. 主程序：遍历数据集，画 Complex MLP vs Complex PU
-# ==========================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument("--save_dir", type=str, default="./checkpoints_complex_test")
     parser.add_argument("--seed", type=int, default=42)
 
-    # 你的复数 ckpt 命名里通常带 hidden_dim（例如 complex_mlp_h64_*）
+    # Checkpoint names include the hidden width.
     parser.add_argument("--hidden_dim", type=int, default=64)
 
-    # SHAP 采样参数
     parser.add_argument("--n_bg", type=int, default=100)
     parser.add_argument("--n_eval", type=int, default=200)
 
@@ -110,7 +97,7 @@ def main():
 
     datasets = ["friedman", "concrete", "california"]
 
-    # 复数模型配置（tag 要和你训练时保存文件名一致）
+    # Tags must match the checkpoint filenames.
     models_config = [
         ("Complex MLP (Baseline)", "complex_mlp", f"complex_mlp_h{args.hidden_dim}"),
         ("Complex PU-ResNet (Ours)", "complex_pu", f"complex_pu_h{args.hidden_dim}"),
@@ -153,11 +140,9 @@ def main():
             )
             matrices.append(mat)
 
-        # 有任何一个模型没算出来就跳过
         if any(m is None for m in matrices):
             continue
 
-        # 绘图
         fig, axes = plt.subplots(1, 2, figsize=(14, 6))
         for ax, matrix, (label, _, _) in zip(axes, matrices, models_config):
             im = ax.imshow(matrix, cmap="viridis", origin="lower", vmin=0, vmax=1)

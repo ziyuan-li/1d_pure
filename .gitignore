@@ -106,10 +106,52 @@ venv.bak/
 # Only for this project
 .idea/
 
-# Generated checkpoints, figures, and tables
-artifacts/
+# Generated artifacts; retain only the selected experiment summaries
+/artifacts/*
+!/artifacts/reports/
+/artifacts/reports/*
+!/artifacts/reports/jocs_v1/
+/artifacts/reports/jocs_v1/*
+!/artifacts/reports/jocs_v1/README.md
+!/artifacts/reports/jocs_v1/table1_benchmark.csv
+!/artifacts/reports/jocs_v1/table2_context_main.csv
+!/artifacts/reports/jocs_v1/table2_context_ablations.csv
+!/artifacts/reports/jocs_v1/table2_context_ablation_paired_effects.csv
+!/artifacts/reports/jocs_v1/table3_synthetic.csv
+!/artifacts/reports/jocs_v1/table3_synthetic_interaction_robustness.csv
+!/artifacts/reports/jocs_v1/paired_effects_bootstrap.csv
+!/artifacts/reports/jocs_v1/cv_architecture_effects.csv
+!/artifacts/reports/jocs_v1/robustness/
+/artifacts/reports/jocs_v1/robustness/*
+!/artifacts/reports/jocs_v1/robustness/noise_robustness_summary.csv
+!/artifacts/reports/jocs_v1/robustness/noise_robustness_auc.csv
+!/artifacts/reports/jocs_v1/robustness/noise_robustness_overall_auc.csv
+!/artifacts/reports/jocs_v1/robustness/noise_robustness_auc_effects.csv
+!/artifacts/reports/jocs_v1/robustness/protocol.json
+!/artifacts/reports/jocs_v1/sample_efficiency/
+/artifacts/reports/jocs_v1/sample_efficiency/*
+!/artifacts/reports/jocs_v1/sample_efficiency/sample_efficiency_summary.csv
+!/artifacts/reports/jocs_v1/sample_efficiency/sample_efficiency_paired_effects.csv
+!/artifacts/reports/jocs_v1/sample_efficiency/sample_efficiency_aulc.csv
+!/artifacts/reports/jocs_v1/sample_efficiency/sample_efficiency_aulc_effects.csv
+!/artifacts/reports/jocs_v1/sample_efficiency/protocol.json
+!/artifacts/reports/jocs_v1/inference_efficiency/
+/artifacts/reports/jocs_v1/inference_efficiency/*
+!/artifacts/reports/jocs_v1/inference_efficiency/inference_timings_summary.csv
+!/artifacts/reports/jocs_v1/inference_efficiency/protocol.json
+
+# Local writing, submission materials, and compiled documents
+/docs/
+/manuscript/
+/output/
+/*.tex
+/*.bib
+/*.doc
+/*.docx
+/*.pdf
+/*.zip
 
 # Local downloads and temporary render/inspection files
 data/raw/*
 !data/raw/README.md
-tmp/
+/tmp/

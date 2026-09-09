@@ -1,4 +1,4 @@
-"""Run the frozen CV-MLP/CV-PURe JoCS controls."""
+"""Run the CV-MLP and CV-PURe comparison grid."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ def _run(command: list[str], *, environment: dict[str, str], log) -> bool:
 
 
 def _matches_frozen_protocol(run_dir: Path, job: Job) -> bool:
-    """Return whether an existing run is reusable under the frozen protocol."""
+    """Check that a saved run matches the configured protocol."""
     config_path = run_dir / "config.json"
     manifest_path = run_dir / "manifest.json"
     if not config_path.is_file() or not manifest_path.is_file():

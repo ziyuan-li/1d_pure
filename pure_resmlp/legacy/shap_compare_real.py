@@ -1,4 +1,3 @@
-# 08_shap_compare.py
 import os
 import argparse
 import numpy as np
@@ -10,14 +9,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_friedman1, fetch_california_housing
 
-# 假设模型定义在这些文件中
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
 
-# ==========================================
-# 1. 数据加载逻辑
-# ==========================================
 def load_data(dataset_name):
     if dataset_name == "friedman":
         X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
@@ -42,9 +37,6 @@ def load_data(dataset_name):
     return X_train_s, X_test_s, feature_names
 
 
-# ==========================================
-# 2. SHAP 计算核心
-# ==========================================
 def build_predict_fn(model, device):
     def predict_fn(X_numpy):
         X_t = torch.from_numpy(X_numpy).float().to(device)
@@ -59,7 +51,6 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=200):
     device = next(model.parameters()).device
     predict_fn = build_predict_fn(model, device)
 
-    # 采样
     X_bg = X_train[np.random.choice(X_train.shape[0], min(len(X_train), n_bg), replace=False)]
     X_eval = X_test[np.random.choice(X_test.shape[0], min(len(X_test), n_eval), replace=False)]
 
@@ -83,9 +74,6 @@ def get_interaction_matrix(model, X_train, X_test, n_bg=100, n_eval=200):
     return matrix
 
 
-# ==========================================
-# 3. 主程序：遍历三个数据集
-# ==========================================
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run_id", type=int, default=0)
@@ -97,7 +85,6 @@ def main():
     torch.manual_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # 数据集列表
     datasets = ["friedman", "concrete", "california"]
     models_config = [
         ("MLP (Baseline)", "mlp", "mlp4_h128"),
@@ -116,7 +103,6 @@ def main():
         input_dim = X_train_s.shape[1]
         matrices = []
 
-        # 计算两个模型的矩阵
         for label, m_type, m_tag in models_config:
             ckpt_path = os.path.join(args.save_dir, f"{m_tag}_{ds}_run{args.run_id}_best.pth")
             print(f"  - Model: {label}")
@@ -136,7 +122,6 @@ def main():
             mat = get_interaction_matrix(model, X_train_s, X_test_s)
             matrices.append(mat)
 
-        # 绘图逻辑
         if any(m is None for m in matrices):
             continue
 
@@ -149,7 +134,6 @@ def main():
             ax.set_xticklabels(feature_names, rotation=45, ha='right')
             ax.set_yticklabels(feature_names)
 
-        # 整体美化
         fig.subplots_adjust(right=0.85)
         cbar_ax = fig.add_axes([0.88, 0.15, 0.02, 0.7])
         fig.colorbar(im, cax=cbar_ax, label="Normalized Interaction Strength")
@@ -158,7 +142,7 @@ def main():
 
         save_path = os.path.join(args.save_dir, f"shap_compare_{ds}_run{args.run_id}.png")
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.close()  # 释放内存
+        plt.close()
         print(f"\nDone! Figure saved to: {save_path}")
 
     print("\nAll SHAP comparisons completed.")

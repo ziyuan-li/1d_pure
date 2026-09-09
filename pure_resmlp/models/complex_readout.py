@@ -5,12 +5,10 @@ import torch.nn as nn
 
 
 class ComplexRealProjection(nn.Module):
-    """Project each complex output onto a learnable real-valued axis.
+    """Compute a * Re(z) + b * Im(z) + c for signed regression targets.
 
-    The projection starts as ``Re(z)`` so gradients remain well-defined when a
-    preceding output layer is zero-initialized. During training, the model can
-    also use the imaginary component. This supports signed standardized
-    regression targets, unlike a magnitude readout.
+    Initialize (a, b, c) = (1, 0, 0). The real component passes gradients
+    through a zero-initialized output layer.
     """
 
     def __init__(self, output_dim: int) -> None:

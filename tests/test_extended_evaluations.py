@@ -1,4 +1,4 @@
-"""Tests for the strengthened robustness and sample-efficiency protocols."""
+"""Tests for input-noise and sample-efficiency evaluation."""
 
 import numpy as np
 import pandas as pd

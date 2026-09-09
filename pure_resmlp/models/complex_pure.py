@@ -8,10 +8,9 @@ from pure_resmlp.models.complex_readout import ComplexRealProjection
 
 
 class ComplexProductUnit1D(nn.Module):
-    """
-    复数乘积单元 (修改版):
-    通过分别对实部和虚部进行 ReLU + sqrt(0.5) 处理，
-    确保 log(z) 运算的数值稳定性。
+    """Complex product unit with a componentwise ReLU + sqrt(0.5) shift.
+
+    Shifted inputs lie in the first quadrant and have modulus at least one.
     """
 
     def __init__(self, in_dim, out_dim, ini0=False):
@@ -21,29 +20,23 @@ class ComplexProductUnit1D(nn.Module):
         if ini0:
             nn.init.zeros_(self.linear.weight)
 
-        # 原有的 threshold 参数不再需要，改为固定常数偏移
         self.offset = math.sqrt(0.5)
 
     def forward(self, z):
-        # 1. 分离实部和虚部
         z_real = z.real
         z_imag = z.imag
 
-        # 2. 分别应用 ReLU 并加上 sqrt(0.5)
-        # 这样确保了新的实部和虚部均 >= 0.707...
+        # The componentwise shift keeps inputs in the first quadrant with |z| >= 1.
         safe_real = torch.relu(z_real) + self.offset
         safe_imag = torch.relu(z_imag) + self.offset
 
-        # 3. 构造安全的复数并计算复数对数
-        # torch.log(z) 对于复数会自动计算 ln|z| + i*arg(z)
+        # torch.log uses the principal complex logarithm.
         safe_z = torch.complex(safe_real, safe_imag)
         z_log = torch.log(safe_z)
 
-        # 4. 线性变换后取指数：exp(W * log(z)) 相当于 z^W
         return torch.exp(self.linear(z_log))
 
 
-# 其余 Block 和 ResNet 结构保持不变
 class ComplexPUResidualBlock1D(nn.Module):
     def __init__(self, hidden_dim, ini0=False):
         super().__init__()

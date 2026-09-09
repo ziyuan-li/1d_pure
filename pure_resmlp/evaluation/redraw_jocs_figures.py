@@ -1,4 +1,4 @@
-"""Redraw all JoCS figures from frozen report tables and run artifacts."""
+"""Redraw JoCS figures from saved report tables and run artifacts."""
 
 from __future__ import annotations
 

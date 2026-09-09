@@ -1,4 +1,4 @@
-"""Summarize the complete JoCS experiment suite without recomputing models."""
+"""Summarize saved JoCS training and interaction results."""
 
 from __future__ import annotations
 
@@ -157,7 +157,7 @@ def aggregate(
 
 
 def collect_interaction_robustness(frame: pd.DataFrame) -> pd.DataFrame:
-    """Collect nested attribution resamples without counting them as model runs."""
+    """Collect attribution resamples with training and sampling seed identifiers."""
 
     records: list[dict[str, Any]] = []
     synthetic = frame[

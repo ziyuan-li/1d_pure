@@ -1,4 +1,3 @@
-# test_mlp.py
 import argparse
 import os
 import numpy as np
@@ -16,13 +15,11 @@ from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
 
-# --- 辅助工具函数 ---
 def count_parameters(model: nn.Module) -> int:
-    """ 计算模型的可训练参数总量 """
+    """Count trainable tensor elements."""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# --- 数据加载函数 (保持不变) ---
 def load_friedman():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=0)
@@ -71,7 +68,7 @@ def eval_on_test(model, loader, device):
 
 
 def plot_loss_curves(loss_curves, dataset_name, save_dir):
-    """ 为单个数据集绘制 MLP vs PU 的 Loss 对比图 """
+    """Plot loss curves for real MLP and PURe on one dataset."""
     try:
         plt.figure(figsize=(8, 5))
         for m_type in ["mlp", "pu"]:
@@ -130,7 +127,7 @@ def main():
         X_train_s, X_val_s, X_test_s, y_train_s, y_val_s, y_test_s = standardize_splits(*data_splits)
         input_dim = X_train_s.shape[1]
 
-        # 预生成噪声
+        # Reuse the same noise samples across models.
         rng = np.random.RandomState(123)
         test_noises = {std: (np.zeros_like(X_test_s) if std == 0.0 else rng.normal(0, std, X_test_s.shape)) for std in
                        noise_stds}
@@ -147,7 +144,6 @@ def main():
 
                 if not os.path.exists(ckpt_path): continue
 
-                # 构建与加载模型
                 ckpt = torch.load(ckpt_path, map_location="cpu")
                 h_dim = ckpt["hidden_dim"]
                 model = build_4layer_mlp(input_dim, 1, h_dim) if model_type == "mlp" \
@@ -155,24 +151,20 @@ def main():
                 model.load_state_dict(ckpt["model_state_dict"])
                 model.to(device)
 
-                # 记录参数量 (只需记录一次)
                 if param_count == 0:
                     param_count = count_parameters(model)
 
-                # 评估各噪声下的表现
                 for std in noise_stds:
                     X_noisy = torch.from_numpy(X_test_s + test_noises[std]).float()
                     y_true = torch.from_numpy(y_test_s).float().unsqueeze(-1)
                     loader = DataLoader(TensorDataset(X_noisy, y_true), batch_size=128)
                     run_metrics[std].append(eval_on_test(model, loader, device))
 
-                # 读取历史 Loss
                 if os.path.exists(loss_path):
                     ld = np.load(loss_path)
                     current_loss_curves[model_type]["train"].append(ld["train_losses"])
                     current_loss_curves[model_type]["val"].append(ld["val_losses"])
 
-            # 填充结果数据
             for std in noise_stds:
                 vals = np.array(run_metrics[std])
                 if len(vals) > 0:
@@ -183,7 +175,6 @@ def main():
 
         plot_loss_curves(current_loss_curves, dname, args.save_dir)
 
-    # --- 输出美化表格 ---
     print("\n" + "=" * 85)
     header = f"{'DATASET':<12} | {'MODEL':<8} | {'PARAMS':<10} | {'NOISE':<6} | {'MSE MEAN':<12} | {'MSE STD':<10}"
     print(header)

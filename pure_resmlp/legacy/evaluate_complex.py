@@ -11,22 +11,18 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 
-# 导入实数模型（保留以备查）
 from pure_resmlp.models.mlp import build_4layer_mlp
 from pure_resmlp.models.pure import RealPUResNet1D
 
-# 导入复数模型
 from pure_resmlp.models.complex_pure import ComplexPUResNet1D
 from pure_resmlp.models.complex_mlp import build_complex_mlp
 
 
-# --- 辅助工具函数 ---
 def count_parameters(model: nn.Module) -> int:
-    """ 计算模型的可训练参数总量 """
+    """Count trainable tensor elements."""
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# --- 数据加载函数 (保持不变) ---
 def load_friedman():
     X, y = make_friedman1(n_samples=10000, n_features=10, noise=0.0, random_state=0)
     X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.30, random_state=0)
@@ -61,7 +57,6 @@ def standardize_splits(X_train, X_val, X_test, y_train, y_val, y_test):
     return X_train_s, X_val_s, X_test_s, y_train_s, y_val_s, y_test_s
 
 
-# --- 修改后的评估函数：适配复数模型 ---
 def eval_on_test(model, loader, device):
     criterion = nn.MSELoss()
     model.eval()
@@ -69,11 +64,10 @@ def eval_on_test(model, loader, device):
     with torch.no_grad():
         for X, y in loader:
             X, y = X.to(device), y.to(device)
-            # 如果是复数模型，输入需要转换
             if not X.is_complex():
                 X = X.to(torch.complex64)
 
-            # 复数模型输出后取实部进行 MSE 比较
+            # Compare real-valued predictions with standardized targets.
             pred = model(X)
             total_loss += criterion(pred, y).item() * X.size(0)
             n += X.size(0)
@@ -81,7 +75,7 @@ def eval_on_test(model, loader, device):
 
 
 def plot_loss_curves(loss_curves, dataset_name, save_dir):
-    """ 为单个数据集绘制 Complex MLP vs Complex PU 的 Loss 对比图 """
+    """Plot loss curves for complex MLP and PURe on one dataset."""
     try:
         plt.figure(figsize=(8, 5))
         for m_type in ["complex_mlp", "complex_pu"]:
@@ -112,7 +106,6 @@ def plot_loss_curves(loss_curves, dataset_name, save_dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    # 默认路径改为复数模型保存路径
     parser.add_argument("--save_dir", type=str, default="./checkpoints_complex_test")
     parser.add_argument("--runs", type=int, default=5)
     parser.add_argument("--noise_stds", type=float, nargs="+", default=[0.0, 0.05])
@@ -146,7 +139,6 @@ def main():
         test_noises = {std: (np.zeros_like(X_test_s) if std == 0.0 else rng.normal(0, std, X_test_s.shape)) for std in
                        noise_stds}
 
-        # 更新模型对比列表为复数版本
         current_loss_curves = {"complex_mlp": {"train": [], "val": []}, "complex_pu": {"train": [], "val": []}}
 
         for model_type, model_tag in [("complex_mlp", f"complex_mlp_h{args.hidden_dim}"),
@@ -160,7 +152,6 @@ def main():
 
                 if not os.path.exists(ckpt_path): continue
 
-                # 加载复数模型权重
                 ckpt = torch.load(ckpt_path, map_location="cpu")
                 h_dim = ckpt.get("hidden_dim", args.hidden_dim)
 
@@ -175,7 +166,6 @@ def main():
                 if param_count == 0: param_count = count_parameters(model)
 
                 for std in noise_stds:
-                    # 准备测试数据，保持 float 类型，由 eval_on_test 处理转换
                     X_noisy = torch.from_numpy(X_test_s + test_noises[std]).float()
                     y_true = torch.from_numpy(y_test_s).float().unsqueeze(-1)
                     loader = DataLoader(TensorDataset(X_noisy, y_true), batch_size=128)
@@ -196,7 +186,6 @@ def main():
 
         plot_loss_curves(current_loss_curves, dname, args.save_dir)
 
-    # --- 输出表格 ---
     print("\n" + "=" * 85)
     header = f"{'DATASET':<12} | {'MODEL':<12} | {'PARAMS':<10} | {'NOISE':<6} | {'MSE MEAN':<12} | {'MSE STD':<10}"
     print(header)

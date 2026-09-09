@@ -1,4 +1,3 @@
-# 17_complex_test_sample_efficiency.py
 import argparse
 import os
 import numpy as np
@@ -27,7 +26,7 @@ def load_raw_test_data(dataset_name):
         data = fetch_california_housing()
         X, y = data.data, data.target
 
-    # 固定 test split（与 16 一致）
+    # Use the same split seed as the sample-efficiency trainer.
     _, X_test, _, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
     return X_test, y_test
 
@@ -45,7 +44,6 @@ def evaluate_model_complex(model, X_test, y_test, scaler_params, device):
     X_t = torch.tensor(X_test_s).float().to(device)
     y_t = torch.tensor(y_test_s).float().unsqueeze(1).to(device)
 
-    # 复数 forward
     pred = model(X_t.to(torch.complex64))
     loss = nn.MSELoss()(pred, y_t)
     return float(loss.item())
@@ -58,7 +56,6 @@ def main():
     parser.add_argument("--save_dir", type=str, default="./checkpoints_efficiency_complex_init0")
     parser.add_argument("--hidden_dim", type=int, default=64)
 
-    # fractions 允许自定义（默认与 07 对齐）
     parser.add_argument("--fractions", type=str, default="0.05,0.1,0.2,0.4,0.6,0.8",
                         help="逗号分隔，比如 0.05,0.1,0.2,...")
     args = parser.parse_args()
@@ -69,7 +66,6 @@ def main():
     print(f"Loading fixed test set for {args.dataset} ...")
     X_test, y_test = load_raw_test_data(args.dataset)
 
-    # 结果容器
     results = {
         "complex_mlp": {"means": [], "stds": []},
         "complex_pu": {"means": [], "stds": []},
@@ -124,7 +120,7 @@ def main():
         p_val = np.nan
         sig = "N/A"
 
-        # paired t-test（需要两边都凑齐 runs 个点）
+        # Pair errors by training run when both models have all runs.
         if len(mlp_raw) == args.runs and len(pu_raw) == args.runs:
             _, p_val = stats.ttest_rel(mlp_raw, pu_raw)
             p_values_dict[frac] = p_val
@@ -141,7 +137,6 @@ def main():
             "Sig.": sig
         })
 
-    # 打印汇总表
     print("\n" + "=" * 30 + " FINAL STATISTICAL SUMMARY (COMPLEX) " + "=" * 30)
     df = pd.DataFrame(summary_rows)
     pd.set_option("display.max_columns", None)
@@ -149,7 +144,6 @@ def main():
     print(df.to_string(index=False))
     print("=" * 95)
 
-    # 画图
     plt.figure(figsize=(10, 6))
     x_axis = np.array(fractions) * 100
 
@@ -164,7 +158,7 @@ def main():
     plt.plot(x_axis, pu_m, "s-", label="Complex PU-ResNet (Ours)", lw=2)
     plt.fill_between(x_axis, pu_m - pu_s, pu_m + pu_s, alpha=0.15)
 
-    # 星号标注 p<0.05
+    # Asterisks mark p < 0.05.
     has_star = False
     for i, frac in enumerate(fractions):
         if frac in p_values_dict and p_values_dict[frac] < 0.05 and not np.isnan(pu_m[i]):
