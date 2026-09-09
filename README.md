@@ -1,133 +1,227 @@
 # PU-ResMLP
 
-Code for **Modeling Nonlinear Feature Interactions with Product-Unit Residual Networks**.
+PyTorch implementations of **Product-Unit Residual Networks (PURe)** for
+nonlinear regression and input-level interaction analysis. The project includes
+real- and complex-valued PURe, MLP and residual baselines, and context-aware
+feature-crossing models.
 
-The repository compares real- and complex-valued MLP and Product-Unit Residual
-Network (PURe) models on six scientific regression benchmarks: Friedman 1,
-Concrete Compressive Strength, California Housing, Energy Efficiency, Yacht
-Hydrodynamics, and Auto MPG.
+[Experiment results](artifacts/reports/jocs_v1/README.md) ·
+[Scientific CV-MLP comparison](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md) ·
+[Dataset setup](data/raw/README.md)
 
-The context-aware main study uses Bike Sharing and Parkinsons Telemonitoring.
-Every dataset uses a leakage-safe split appropriate to its sampling structure
-and training-only preprocessing statistics.
+## Experiments
 
-## Repository layout
+| Task | Datasets | Training seeds | Evaluation |
+|---|---|---|---|
+| Interaction recovery | Pairwise and higher-order synthetic functions | 0–2 | RMSE, Precision@K, Recall@K, mean rank |
+| Scientific regression | Friedman, Concrete, California Housing, Energy, Yacht, Auto MPG | 0–4 | Test RMSE |
+| Context-aware prediction | Bike Sharing, Parkinsons Telemonitoring | 0–4 | MAE, RMSE, R-squared, interaction maps |
+| Input-noise robustness | Six scientific and two context datasets | 0–4, saved models | Normalized RMSE curves and noisy-performance AUC |
+| Sample efficiency | Friedman, Concrete, Parkinsons | 0–4 | Learning curves and RMSE AULC |
+| Inference efficiency | Friedman, Yacht, Auto MPG | 0–4, saved models | Repeated full-test inference latency |
 
-```text
-PU-ResMLP/
-|-- pure_resmlp/
-|   |-- models/       # RV-MLP, RV-PURe, CV-MLP, CV-PURe, and Res-MLP
-|   |-- training/     # Main and sample-efficiency training entry points
-|   |-- evaluation/   # Publication tables, figures, robustness, and SHAP
-|   `-- legacy/       # Older single-purpose scripts retained for reference
-|-- experiments/
-|   `-- superconductivity/  # Historical experiment, not in the journal benchmark
-|-- tests/
-|-- data/
-|   `-- raw/          # UCI datasets added for the JoCS extension
-`-- artifacts/        # Generated runs and selected result summaries
-```
+Scientific and synthetic tasks use split seed 0. Bike uses a chronological
+split; Parkinsons uses chronological splits within each subject. Preprocessing
+statistics are fitted on training data. Synthetic attribution uses sampling
+seeds 0–4 for each checkpoint; these are separate from training seeds. Bike
+context ablations use training seeds 0–2.
 
 ## Installation
 
-Python 3.10 or newer is recommended.
+Use Python 3.12, the version used for the repository checks. Run commands from
+the repository root.
 
 ```bash
+git clone https://github.com/ziyuan-li/PU-ResMLP.git
+cd PU-ResMLP
 python -m venv .venv
+```
+
+Activate the environment on Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Or in Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Then install dependencies:
+
+```bash
 python -m pip install -r requirements.txt
 ```
 
-Run all commands below from the repository root.
+The single-run trainer supports CPU and CUDA. GPU runs require a CUDA-enabled
+PyTorch installation. The suite launchers use CUDA devices selected with
+`--gpus`; use `--gpus 0` for one GPU or `--gpus 0 1` for two.
 
-Run the lightweight architecture checks with:
+## Data
+
+Friedman and the interaction-recovery datasets are generated in code. Concrete
+is included under `data/concrete+compressive+strength/`. Download the remaining
+datasets to the paths in the [data guide](data/raw/README.md) before training.
+The loaders read local files; they do not download datasets automatically.
+
+## Training
+
+### Scientific regression
+
+For example, train CV-PURe on Friedman:
 
 ```bash
-pytest
+python -m pure_resmlp.training.run_experiment --experiment jocs_benchmark_v1 --dataset friedman --model cv_pure --seed 0 --split-seed 0 --hidden-dim 64 --epochs 200 --patience 20 --batch-size 128
 ```
 
-## Main experiments
+The four-model grid uses `mlp`, `resmlp`, `rv_pure`, and `cv_pure` on
+`friedman`, `concrete`, `california`, `energy`, `yacht`, and `auto_mpg`, each with
+training seeds 0–4. Real models use width 128; CV-PURe uses width 64. Energy
+uses heating load (`--energy-target Y1`). The default learning rate is 0.001.
 
-The supported unified runner records config, environment, split indices, loss
-history, predictions, metrics, checkpoint, and a completion manifest:
+Scientific CV-MLP is a separate addition at width 64 under the same scientific
+training settings. Its launcher first checks the existing CV-PURe baseline
+configurations and split indices:
 
 ```bash
-python -m pure_resmlp.training.run_experiment \
-  --experiment jocs_benchmark_v1 --dataset friedman --model cv_pure \
-  --seed 0 --split-seed 0
+python -m pure_resmlp.training.run_scientific_cv_mlp --gpus 0
 ```
 
-Evaluate the saved main models under the frozen Gaussian feature-noise protocol:
+This adds 30 CV-MLP runs. Its five-model results are in
+[`jocs_scientific_cv_mlp_v1`](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md);
+the original four-model tables remain in `jocs_v1`.
+
+### Synthetic interaction recovery
+
+For example, train on the higher-order task:
+
+```bash
+python -m pure_resmlp.training.run_experiment --experiment jocs_synthetic_v1 --dataset synthetic_higher_order --model cv_pure --seed 0 --split-seed 0 --hidden-dim 64 --epochs 100 --patience 15 --batch-size 256
+```
+
+Use `synthetic_pairwise` for the pairwise task. Both tasks compare `mlp`,
+`resmlp`, `rv_pure`, and `cv_pure` at width 64 with training seeds 0–2. The
+higher-order task also includes CV-MLP through the complex-baseline launcher
+below. Data-generation settings are in
+[`synthetic.py`](pure_resmlp/data/synthetic.py).
+
+### Context-aware prediction
+
+For example, train RV-PURe on Bike Sharing:
+
+```bash
+python -m pure_resmlp.training.run_experiment --experiment jocs_bike_context_v1 --dataset bike_sharing --model rv_pure --seed 0 --hidden-dim 64 --epochs 100 --patience 15 --batch-size 256
+```
+
+Use `jocs_parkinsons_context_v1` and `parkinsons_telemonitoring` for Parkinsons.
+Both context grids use `mlp_ordinary`, `mlp_context`, `mlp_explicit_cross`,
+`dcnv2_context`, `rv_pure`, and `cv_pure`, with width 64 and training seeds 0–4.
+The complex-baseline launcher adds CV-MLP for higher-order recovery and both
+context datasets, and runs or reuses the Bike CV-PURe comparisons:
+
+```bash
+python -m pure_resmlp.training.run_cv_baselines --gpus 0
+```
+
+Bike ablations use RV-PURe with the same context settings and training seeds
+0–2. Set the following experiment name and `--context-ablation` value:
+
+| Experiment | Ablation |
+|---|---|
+| `jocs_bike_ablation_no_time_v1` | `bike_no_time` |
+| `jocs_bike_ablation_no_calendar_v1` | `bike_no_calendar` |
+| `jocs_bike_ablation_no_weather_v1` | `bike_no_weather` |
+
+The examples above run one dataset/model/seed combination. Repeat them over
+the indicated grids to regenerate the complete studies. The `--experiment`
+names identify the directories expected by the summary scripts.
+
+## Evaluation
+
+Evaluation requires the saved run artifacts and source datasets. A fresh clone
+contains result summaries, but not trained checkpoints.
+
+### Interaction analysis
+
+Evaluate a synthetic checkpoint, then repeat attribution sampling:
+
+```bash
+python -m pure_resmlp.evaluation.run_interactions artifacts/runs/jocs_synthetic_v1/synthetic_higher_order/cv_pure/seed_0 --n-samples 256 --seed 0
+python -m pure_resmlp.evaluation.run_interactions artifacts/runs/jocs_synthetic_v1/synthetic_higher_order/cv_pure/seed_0 --n-samples 256 --resample-seeds 0 1 2 3 4
+```
+
+The same evaluator computes grouped interactions for context checkpoints.
+Use sampling seed 0 for the context maps. Recovery resampling applies to
+synthetic tasks with known interacting pairs.
+
+### Robustness, sample efficiency, and latency
 
 ```bash
 python -m pure_resmlp.evaluation.evaluate_noise_robustness
-```
-
-Run the 10%/25%/50% sample-efficiency additions on two GPUs, then combine them
-with the existing 100% main runs:
-
-```bash
-python -m pure_resmlp.training.run_sample_efficiency_suite --gpus 0 1
+python -m pure_resmlp.training.run_sample_efficiency_suite --gpus 0
 python -m pure_resmlp.evaluation.summarize_sample_efficiency
-```
-
-Run the CV-MLP baselines used for the higher-order synthetic task, Bike, and
-Parkinsons, including their interaction analyses:
-
-```bash
-python -m pure_resmlp.training.run_cv_baselines --gpus 0 1
-python -m pure_resmlp.evaluation.summarize_jocs --runs-root artifacts/runs --output-dir artifacts/reports/jocs_v1
-```
-
-Generate the main paper summary and figures:
-
-```bash
-python -m pure_resmlp.evaluation.summarize_jocs --runs-root artifacts/runs --output-dir artifacts/reports/jocs_v1
-python -m pure_resmlp.evaluation.plot_jocs --runs-root artifacts/runs --report-dir artifacts/reports/jocs_v1
-python -m pure_resmlp.evaluation.audit_checkpoints --runs-root artifacts/runs --strict
-```
-
-Rebenchmark full-test inference latency with CUDA synchronization and repeated
-measurements:
-
-```bash
 python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0
 ```
 
-## Current reproducibility status
+Noise evaluation uses levels 0, 0.02, 0.05, and 0.10 without retraining.
+Sample-efficiency training adds 10%, 25%, and 50% subsets and reuses the
+existing 100% runs. The committed latency results were measured on a single
+NVIDIA Tesla V100-SXM2-32GB; measurements on other hardware will differ.
 
-- The journal main result set contains 226 training runs and 106 interaction
-  analyses. The scientific benchmark contributes 120 checkpoints: four models,
-  six datasets, five training seeds, and fixed split seed zero. CV-MLP is also
-  included for higher-order interaction recovery, Bike, and Parkinsons.
-- Gaussian robustness reuses 190 main checkpoints for 3,040 inference
-  evaluations at four noise levels and five corruption seeds. Its primary
-  comparison is target-SD-normalized noisy-performance AUC over sigma 0--0.1.
-- Sample efficiency adds 210 low-data checkpoints on Friedman, Concrete, and
-  Parkinsons and reuses 70 full-data runs, yielding 280 curve observations.
-- The server artifact audit loads all 226 formal checkpoints and 210 new
-  low-data checkpoints successfully. The 13 CV-MLP baselines on higher-order
-  synthetic data, Bike, and Parkinsons are part of that formal audit; all 48
-  automated tests pass.
-- Complex-valued models use a learnable real projection initialized as the
-  real component. It supports signed standardized targets and passes gradients
-  through a zero-initialized output layer.
+### Summaries, figures, and checkpoint checks
 
-## Results and repository contents
+After completing all required training runs and interaction analyses:
 
-The [result index](artifacts/reports/jocs_v1/README.md) lists the versioned
-experiment summaries and evaluation protocols. Training and evaluation write
-their outputs to `artifacts/`; only the selected CSV tables and protocol JSON
-files are included in Git. Checkpoints, per-run artifacts, and generated figures
-remain local. Dataset sources and loading notes are in
-[data/raw/README.md](data/raw/README.md).
+```bash
+python -m pure_resmlp.evaluation.summarize_jocs --runs-root artifacts/runs --output-dir artifacts/reports/jocs_v1
+python -m pure_resmlp.evaluation.redraw_jocs_figures
+python -m pure_resmlp.evaluation.audit_checkpoints --runs-root artifacts/runs --strict
+python -m pure_resmlp.evaluation.audit_scientific_cv_mlp --device cuda:0
+```
 
-The repository contains experiment code, tests, dependencies, data instructions,
-and result summaries. Manuscripts, extension plans, writing notes, cover letters,
-highlights, compiled documents, and temporary files remain local and are excluded
-by `.gitignore`.
+The main summarizer expects the complete 226-run grid and its interaction
+outputs. Figure redrawing also requires the noise and sample-efficiency
+summaries. Scientific CV-MLP results and their checkpoint audit are separate.
+Use `--help` on any entry point for its options.
 
-## Legacy scripts
+## Tests
 
-Files in `pure_resmlp/legacy/` are preserved to document earlier analysis steps.
-The supported publication entry points are the modules in
-`pure_resmlp/evaluation/`.
+After dataset setup, run the full test suite:
+
+```bash
+python -m pytest tests -q
+```
+
+Architecture, synthetic interaction, and recording checks can run without
+external datasets:
+
+```bash
+python -m pytest tests/test_zero_initialization.py tests/test_interactions.py tests/test_run_recording.py tests/test_scientific_cv_mlp.py -q
+```
+
+## Repository layout and outputs
+
+```text
+pure_resmlp/
+  data/          Dataset loading, splits, and synthetic functions
+  models/        Shared network implementations
+  training/      Unified trainer and suite launchers
+  evaluation/    Interaction analysis, robustness, summaries, and figures
+  experiment/    Run configuration and artifact recording
+tests/           Model, data, protocol, and recording tests
+data/            Included Concrete data and local dataset downloads
+artifacts/
+  runs/          Local checkpoints and per-run outputs
+  reports/       Versioned result summaries and evaluation protocols
+```
+
+Each run saves configuration, environment information, split indices, training
+history, predictions, metrics, a checkpoint, and a completion manifest under
+`artifacts/runs/<experiment>/<dataset>/<model>/seed_<seed>/`.
+
+Git includes the experiment code, dependencies, tests, data instructions, and
+selected result summaries. Downloaded datasets, checkpoints, generated figures,
+and temporary files remain local. Manuscripts and submission materials are
+outside the published repository scope.

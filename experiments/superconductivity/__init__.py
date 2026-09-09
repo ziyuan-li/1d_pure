@@ -1,1 +1,0 @@
-"""Superconductivity regression experiment."""

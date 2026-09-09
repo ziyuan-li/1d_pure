@@ -1,0 +1,308 @@
+{
+  "experiment": "jocs_scientific_cv_mlp_v1",
+  "runs_checked": 30,
+  "status": "passed",
+  "checks": "Checkpoint reload; baseline-identical splits/scalers; prediction replay; recomputed metrics; validation-selected epoch; parameter count. No hashing.",
+  "records": [
+    {
+      "dataset": "friedman",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51461,
+      "test_rmse": 0.16450172377389968,
+      "test_mae": 0.1261391891370157,
+      "test_r2": 0.9988583995313439
+    },
+    {
+      "dataset": "friedman",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51461,
+      "test_rmse": 0.17926100648802823,
+      "test_mae": 0.137093389881809,
+      "test_r2": 0.9986443583822932
+    },
+    {
+      "dataset": "friedman",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51461,
+      "test_rmse": 0.19373681102293425,
+      "test_mae": 0.14497845474245163,
+      "test_r2": 0.9984165748974231
+    },
+    {
+      "dataset": "friedman",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51461,
+      "test_rmse": 0.18483772565660217,
+      "test_mae": 0.1407201213624898,
+      "test_r2": 0.9985586997425349
+    },
+    {
+      "dataset": "friedman",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51461,
+      "test_rmse": 0.18977195400679484,
+      "test_mae": 0.1457066843995106,
+      "test_r2": 0.99848072185399
+    },
+    {
+      "dataset": "concrete",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 5.752671008981844,
+      "test_mae": 3.996764938877778,
+      "test_r2": 0.8796585248634281
+    },
+    {
+      "dataset": "concrete",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 5.740168489810552,
+      "test_mae": 3.908656937305612,
+      "test_r2": 0.8801810427072719
+    },
+    {
+      "dataset": "concrete",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 6.036002527482607,
+      "test_mae": 4.099117937331772,
+      "test_r2": 0.867512446314481
+    },
+    {
+      "dataset": "concrete",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 5.8012889085994646,
+      "test_mae": 4.059301322752143,
+      "test_r2": 0.8776158309050492
+    },
+    {
+      "dataset": "concrete",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 5.767918795113869,
+      "test_mae": 4.020368375204776,
+      "test_r2": 0.879019735375423
+    },
+    {
+      "dataset": "california",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5195086526773774,
+      "test_mae": 0.34597073124046474,
+      "test_r2": 0.7900410272388589
+    },
+    {
+      "dataset": "california",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5100167573260084,
+      "test_mae": 0.3335557089800982,
+      "test_r2": 0.7976432200472863
+    },
+    {
+      "dataset": "california",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.49232506500471934,
+      "test_mae": 0.3261451332389661,
+      "test_r2": 0.811438613711637
+    },
+    {
+      "dataset": "california",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.49817304691015785,
+      "test_mae": 0.33102716184741765,
+      "test_r2": 0.8069324336586573
+    },
+    {
+      "dataset": "california",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5041388410758005,
+      "test_mae": 0.3318694192404156,
+      "test_r2": 0.8022806445767592
+    },
+    {
+      "dataset": "energy",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.6522526147754893,
+      "test_mae": 0.42236697690240277,
+      "test_r2": 0.9960149779667619
+    },
+    {
+      "dataset": "energy",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.609882322861568,
+      "test_mae": 0.43914817711402654,
+      "test_r2": 0.9965158955934633
+    },
+    {
+      "dataset": "energy",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5531830863877851,
+      "test_mae": 0.38688289083283534,
+      "test_r2": 0.9971335996018328
+    },
+    {
+      "dataset": "energy",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5267339882581137,
+      "test_mae": 0.35487505748354176,
+      "test_r2": 0.9974011467617375
+    },
+    {
+      "dataset": "energy",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51205,
+      "test_rmse": 0.5285618306593601,
+      "test_mae": 0.35573242647894504,
+      "test_r2": 0.9973830786805041
+    },
+    {
+      "dataset": "yacht",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 50949,
+      "test_rmse": 0.9386587661071887,
+      "test_mae": 0.6806442175520229,
+      "test_r2": 0.9946891756283476
+    },
+    {
+      "dataset": "yacht",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 50949,
+      "test_rmse": 0.5384884837849936,
+      "test_mae": 0.4147272454931382,
+      "test_r2": 0.9982521695607514
+    },
+    {
+      "dataset": "yacht",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 50949,
+      "test_rmse": 0.8558420908334957,
+      "test_mae": 0.5363232344769419,
+      "test_r2": 0.9955849691563727
+    },
+    {
+      "dataset": "yacht",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 50949,
+      "test_rmse": 0.7954631271795979,
+      "test_mae": 0.47261826535488705,
+      "test_r2": 0.9961859483914517
+    },
+    {
+      "dataset": "yacht",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 50949,
+      "test_rmse": 0.8100722322831573,
+      "test_mae": 0.5099192562509092,
+      "test_r2": 0.9960445677502101
+    },
+    {
+      "dataset": "auto_mpg",
+      "seed": 0,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51333,
+      "test_rmse": 3.2622231727258106,
+      "test_mae": 2.0056163469950357,
+      "test_r2": 0.8319415665487178
+    },
+    {
+      "dataset": "auto_mpg",
+      "seed": 1,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51333,
+      "test_rmse": 3.245791281563953,
+      "test_mae": 2.131629851659139,
+      "test_r2": 0.8336303308224924
+    },
+    {
+      "dataset": "auto_mpg",
+      "seed": 2,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51333,
+      "test_rmse": 3.4127187170223325,
+      "test_mae": 2.135917959213257,
+      "test_r2": 0.8160778805310133
+    },
+    {
+      "dataset": "auto_mpg",
+      "seed": 3,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51333,
+      "test_rmse": 3.326677218383401,
+      "test_mae": 2.183108084996541,
+      "test_r2": 0.8252350639264123
+    },
+    {
+      "dataset": "auto_mpg",
+      "seed": 4,
+      "status": "passed",
+      "max_prediction_difference": 0.0,
+      "trainable_real_dof": 51333,
+      "test_rmse": 3.32006306082668,
+      "test_mae": 2.072513179779053,
+      "test_r2": 0.8259293144555953
+    }
+  ]
+}

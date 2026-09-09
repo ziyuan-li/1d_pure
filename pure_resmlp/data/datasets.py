@@ -166,73 +166,6 @@ def _load_energy(target: str) -> RawDataset:
     )
 
 
-def _load_airfoil() -> RawDataset:
-    path = RAW_DIR / "airfoil_self_noise" / "airfoil_self_noise.dat"
-    frame = pd.read_csv(path, sep=r"\s+", header=None)
-    X, y = _as_float_arrays(frame.iloc[:, :5].to_numpy(), frame.iloc[:, 5].to_numpy())
-    return RawDataset(
-        name="airfoil",
-        X=X,
-        y=y,
-        feature_names=(
-            "frequency",
-            "angle_of_attack",
-            "chord_length",
-            "free_stream_velocity",
-            "suction_side_displacement_thickness",
-        ),
-        target_name="scaled_sound_pressure_level",
-        train_fraction=0.70,
-        validation_fraction=0.15,
-    )
-
-
-def _load_superconductivity() -> RawDataset:
-    path = RAW_DIR / "superconductivity" / "train.csv"
-    frame = pd.read_csv(path)
-    target_name = "critical_temp"
-    if target_name not in frame:
-        raise ValueError(f"missing superconductivity target column: {target_name}")
-    X, y = _as_float_arrays(
-        frame.drop(columns=[target_name]).to_numpy(), frame[target_name].to_numpy()
-    )
-    return RawDataset(
-        name="superconductivity",
-        X=X,
-        y=y,
-        feature_names=tuple(name for name in frame.columns if name != target_name),
-        target_name=target_name,
-        train_fraction=0.70,
-        validation_fraction=0.15,
-    )
-
-
-def _load_combined_cycle_power_plant() -> RawDataset:
-    path = (
-        RAW_DIR
-        / "combined_cycle_power_plant"
-        / "CCPP"
-        / "Folds5x2_pp.xlsx"
-    )
-    frame = pd.read_excel(path)
-    expected_columns = ("AT", "V", "AP", "RH", "PE")
-    if tuple(frame.columns) != expected_columns:
-        raise ValueError("CCPP columns do not match the documented schema")
-    X, y = _as_float_arrays(
-        frame.loc[:, expected_columns[:-1]].to_numpy(),
-        frame[expected_columns[-1]].to_numpy(),
-    )
-    return RawDataset(
-        name="ccpp",
-        X=X,
-        y=y,
-        feature_names=expected_columns[:-1],
-        target_name="PE",
-        train_fraction=0.70,
-        validation_fraction=0.15,
-    )
-
-
 def _load_yacht_hydrodynamics() -> RawDataset:
     path = RAW_DIR / "yacht_hydrodynamics" / "yacht_hydrodynamics.data"
     frame = pd.read_csv(path, sep=r"\s+", header=None)
@@ -253,33 +186,6 @@ def _load_yacht_hydrodynamics() -> RawDataset:
         y=y,
         feature_names=feature_names,
         target_name="residuary_resistance",
-        train_fraction=0.70,
-        validation_fraction=0.15,
-    )
-
-
-def _load_qsar_aquatic_toxicity() -> RawDataset:
-    path = RAW_DIR / "qsar_aquatic_toxicity" / "qsar_aquatic_toxicity.csv"
-    frame = pd.read_csv(path, sep=";", header=None)
-    if frame.shape != (546, 9):
-        raise ValueError("QSAR Aquatic Toxicity must contain 546 rows and 9 columns")
-    feature_names = (
-        "TPSA_Tot",
-        "SAacc",
-        "H_050",
-        "MLOGP",
-        "RDCHI",
-        "GATS1p",
-        "nN",
-        "C_040",
-    )
-    X, y = _as_float_arrays(frame.iloc[:, :8].to_numpy(), frame.iloc[:, 8].to_numpy())
-    return RawDataset(
-        name="qsar_aquatic",
-        X=X,
-        y=y,
-        feature_names=feature_names,
-        target_name="LC50_negative_log_mol_per_liter",
         train_fraction=0.70,
         validation_fraction=0.15,
     )
@@ -351,11 +257,7 @@ def load_raw_dataset(name: str, *, energy_target: str = "Y1") -> RawDataset:
         "friedman": _load_friedman,
         "concrete": _load_concrete,
         "california": _load_california,
-        "airfoil": _load_airfoil,
-        "superconductivity": _load_superconductivity,
-        "ccpp": _load_combined_cycle_power_plant,
         "yacht": _load_yacht_hydrodynamics,
-        "qsar_aquatic": _load_qsar_aquatic_toxicity,
         "auto_mpg": _load_auto_mpg,
     }
     normalized = name.lower().replace("-", "_")

@@ -54,11 +54,7 @@ ALL_DATASETS = (
     "concrete",
     "california",
     "energy",
-    "airfoil",
-    "superconductivity",
-    "ccpp",
     "yacht",
-    "qsar_aquatic",
     "auto_mpg",
     "bike_sharing",
     "parkinsons_telemonitoring",
@@ -393,27 +389,6 @@ def regression_metrics(
     }
 
 
-def grouped_regression_metrics(
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    groups: np.ndarray,
-) -> dict[str, dict[str, float | int]]:
-    """Compute regression metrics separately for each observed group."""
-
-    grouped: dict[str, dict[str, float | int]] = {}
-    for group in np.unique(groups):
-        mask = groups == group
-        targets = y_true[mask]
-        predictions = y_pred[mask]
-        grouped[str(int(group))] = {
-            "samples": int(mask.sum()),
-            "mae": float(mean_absolute_error(targets, predictions)),
-            "rmse": float(mean_squared_error(targets, predictions) ** 0.5),
-            "r2": float(r2_score(targets, predictions)),
-        }
-    return grouped
-
-
 def resolve_device(requested: str) -> torch.device:
     if requested == "auto":
         return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -571,18 +546,6 @@ def main() -> int:
             key: np.asarray(values)[data.test_indices]
             for key, values in data.sample_metadata.items()
         }
-        if "batch_id" in prediction_metadata:
-            metrics["test_by_batch"] = grouped_regression_metrics(
-                data.y_test_raw,
-                prediction_raw,
-                prediction_metadata["batch_id"],
-            )
-        if "gas_id" in prediction_metadata:
-            metrics["test_by_gas"] = grouped_regression_metrics(
-                data.y_test_raw,
-                prediction_raw,
-                prediction_metadata["gas_id"],
-            )
     metrics.update(training_info)
     metrics.update(
         {

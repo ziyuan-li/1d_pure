@@ -3,6 +3,12 @@
 This directory contains summaries generated from the saved experiment runs.
 The CSV files retain the values and columns of the existing reports.
 
+The [scientific CV-MLP addition](../jocs_scientific_cv_mlp_v1/summary.md)
+reports all five scientific models separately. `table1_benchmark.csv` below
+contains the original four-model comparison. The addition includes 30 new
+CV-MLP runs and reuses the 120 scientific baseline runs; it does not add
+CV-MLP to the scientific noise or sample-efficiency suites.
+
 | Files | Contents |
 |---|---|
 | `table1_benchmark.csv` | Scientific regression metrics |

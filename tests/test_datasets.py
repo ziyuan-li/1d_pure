@@ -18,11 +18,7 @@ from pure_resmlp.data import (
         ("concrete", 1_030, 8),
         ("california", 20_640, 8),
         ("energy", 768, 8),
-        ("airfoil", 1_503, 5),
-        ("superconductivity", 21_263, 81),
-        ("ccpp", 9_568, 4),
         ("yacht", 308, 6),
-        ("qsar_aquatic", 546, 8),
         ("auto_mpg", 392, 9),
     ),
 )
@@ -33,6 +29,19 @@ def test_raw_benchmark_shapes(name: str, rows: int, features: int) -> None:
     assert dataset.y.shape == (rows,)
     assert np.isfinite(dataset.X).all()
     assert np.isfinite(dataset.y).all()
+
+
+def test_training_dataset_choices_cover_the_study_tasks() -> None:
+    from pure_resmlp.evaluation.summarize_jocs import BENCHMARK_DATASETS
+    from pure_resmlp.training.run_experiment import ALL_DATASETS
+
+    assert set(ALL_DATASETS) == {
+        *BENCHMARK_DATASETS,
+        "bike_sharing",
+        "parkinsons_telemonitoring",
+        "synthetic_pairwise",
+        "synthetic_higher_order",
+    }
 
 
 def test_benchmark_split_is_complete_disjoint_and_standardized() -> None:
