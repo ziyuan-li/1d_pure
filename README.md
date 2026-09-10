@@ -1,11 +1,8 @@
-# 1d_pure
-
-Code and experiment results for the journal-extension manuscript:
-
-**Beyond Prediction: Learning and Interpreting Nonlinear Interactions with
-Product-Unit Residual Networks**
+# Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Network
 
 Ziyuan Li, Uwe Jaekel, and Babette Dellen
+
+Code and experiment results for the journal-extension manuscript.
 
 Product-Unit Residual Networks (PURe) combine learned multiplicative features
 with residual connections. This study evaluates nonlinear prediction together
