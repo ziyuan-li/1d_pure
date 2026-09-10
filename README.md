@@ -1,20 +1,34 @@
 # 1d_pure
 
-PyTorch implementations of **Product-Unit Residual Networks (PURe)** for
-nonlinear regression and input-level interaction analysis. The project includes
-real- and complex-valued PURe, MLP and residual baselines, and context-aware
-feature-crossing models.
+Code and experiment results for the journal-extension manuscript:
+
+**Beyond Prediction: Learning and Interpreting Nonlinear Interactions with
+Product-Unit Residual Networks**
+
+Ziyuan Li, Uwe Jaekel, and Babette Dellen
+
+Product-Unit Residual Networks (PURe) combine learned multiplicative features
+with residual connections. This study evaluates nonlinear prediction together
+with input-level interaction interpretation: synthetic functions test recovery
+of known interactions, while real-data maps describe the feature relationships
+learned by the models. The PyTorch implementation includes real-valued PURe
+(RV-PURe), complex-valued PURe (CV-PURe), MLP, ResMLP, CV-MLP, explicit-cross
+MLP, and DCNv2.
+
+The manuscript extends our ICCS 2026 paper,
+[Modeling Nonlinear Feature Interactions with Product-Unit Residual Networks](https://doi.org/10.1007/978-3-032-29921-5_6).
+The [conference preprint](https://arxiv.org/abs/2606.06861) is also available.
 
 [Experiment results](artifacts/reports/jocs_v1/README.md) ·
 [Scientific CV-MLP comparison](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md) ·
-[Dataset setup](data/raw/README.md)
+[Dataset setup](data/raw/README.md) · [Citation](#citation)
 
 ## Experiments
 
 | Task | Datasets | Training seeds | Evaluation |
 |---|---|---|---|
-| Interaction recovery | Pairwise and higher-order synthetic functions | 0–2 | RMSE, Precision@K, Recall@K, mean rank |
-| Scientific regression | Friedman, Concrete, California Housing, Energy, Yacht, Auto MPG | 0–4 | Test RMSE |
+| Interaction recovery | Pairwise and higher-order synthetic functions | 0–2 | RMSE, Precision@K, Recall@K, mean rank of true interacting pairs |
+| Scientific regression | Friedman, Concrete, California Housing, Energy Efficiency, Yacht Hydrodynamics, Auto MPG | 0–4 | Test RMSE |
 | Context-aware prediction | Bike Sharing, Parkinsons Telemonitoring | 0–4 | MAE, RMSE, R-squared, interaction maps |
 | Input-noise robustness | Six scientific and two context datasets | 0–4, saved models | Normalized RMSE curves and noisy-performance AUC |
 | Sample efficiency | Friedman, Concrete, Parkinsons | 0–4 | Learning curves and RMSE AULC |
@@ -68,6 +82,20 @@ The loaders read local files; they do not download datasets automatically.
 
 ## Training
 
+### Synthetic interaction recovery
+
+For example, train on the higher-order task:
+
+```bash
+python -m pure_resmlp.training.run_experiment --experiment jocs_synthetic_v1 --dataset synthetic_higher_order --model cv_pure --seed 0 --split-seed 0 --hidden-dim 64 --epochs 100 --patience 15 --batch-size 256
+```
+
+Use `synthetic_pairwise` for the pairwise task. Both tasks compare `mlp`,
+`resmlp`, `rv_pure`, and `cv_pure` at width 64 with training seeds 0–2. The
+higher-order task also includes CV-MLP through the complex-baseline launcher
+below. Data-generation settings are in
+[`synthetic.py`](pure_resmlp/data/synthetic.py).
+
 ### Scientific regression
 
 For example, train CV-PURe on Friedman:
@@ -92,20 +120,6 @@ python -m pure_resmlp.training.run_scientific_cv_mlp --gpus 0
 This adds 30 CV-MLP runs. Its five-model results are in
 [`jocs_scientific_cv_mlp_v1`](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md);
 the original four-model tables remain in `jocs_v1`.
-
-### Synthetic interaction recovery
-
-For example, train on the higher-order task:
-
-```bash
-python -m pure_resmlp.training.run_experiment --experiment jocs_synthetic_v1 --dataset synthetic_higher_order --model cv_pure --seed 0 --split-seed 0 --hidden-dim 64 --epochs 100 --patience 15 --batch-size 256
-```
-
-Use `synthetic_pairwise` for the pairwise task. Both tasks compare `mlp`,
-`resmlp`, `rv_pure`, and `cv_pure` at width 64 with training seeds 0–2. The
-higher-order task also includes CV-MLP through the complex-baseline launcher
-below. Data-generation settings are in
-[`synthetic.py`](pure_resmlp/data/synthetic.py).
 
 ### Context-aware prediction
 
@@ -156,19 +170,41 @@ The same evaluator computes grouped interactions for context checkpoints.
 Use sampling seed 0 for the context maps. Recovery resampling applies to
 synthetic tasks with known interacting pairs.
 
-### Robustness, sample efficiency, and latency
+### Input-noise robustness
 
 ```bash
 python -m pure_resmlp.evaluation.evaluate_noise_robustness
-python -m pure_resmlp.training.run_sample_efficiency_suite --gpus 0
-python -m pure_resmlp.evaluation.summarize_sample_efficiency
-python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0
 ```
 
 Noise evaluation uses levels 0, 0.02, 0.05, and 0.10 without retraining.
-Sample-efficiency training adds 10%, 25%, and 50% subsets and reuses the
-existing 100% runs. The committed latency results were measured on a single
-NVIDIA Tesla V100-SXM2-32GB; measurements on other hardware will differ.
+It evaluates four scientific models and all seven context models. The
+suite-level AUC compares the six models with context inputs; MLP-ordinary
+appears in the dataset-level outputs. Scientific CV-MLP is not included in
+this evaluation. See the
+[suite-level AUC results](artifacts/reports/jocs_v1/robustness/noise_robustness_overall_auc.csv).
+
+### Sample efficiency
+
+```bash
+python -m pure_resmlp.training.run_sample_efficiency_suite --gpus 0
+python -m pure_resmlp.evaluation.summarize_sample_efficiency
+```
+
+Training adds nested 10%, 25%, and 50% subsets and reuses the existing 100%
+runs. The comparison uses four models on Friedman and Concrete and six on
+Parkinsons, including MLP-ordinary; CV-MLP is not part of the low-data study.
+See the [AULC results](artifacts/reports/jocs_v1/sample_efficiency/sample_efficiency_aulc.csv).
+
+### Inference efficiency
+
+```bash
+python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0
+```
+
+The benchmark measures synchronized, repeated full-test inference on Friedman,
+Yacht, and Auto MPG. The committed
+[latency results](artifacts/reports/jocs_v1/inference_efficiency/inference_timings_summary.csv)
+were measured on a single NVIDIA Tesla V100-SXM2-32GB.
 
 ### Summaries, figures, and checkpoint checks
 
@@ -225,3 +261,21 @@ Git includes the experiment code, dependencies, tests, data instructions, and
 selected result summaries. Downloaded datasets, checkpoints, generated figures,
 and temporary files remain local. Manuscripts and submission materials are
 outside the published repository scope.
+
+## Citation
+
+For the original ICCS 2026 formulation, cite:
+
+```bibtex
+@inproceedings{li2026modeling,
+  author    = {Li, Ziyuan and Jaekel, Uwe and Dellen, Babette},
+  title     = {Modeling Nonlinear Feature Interactions with Product-Unit Residual Networks},
+  booktitle = {Computational Science -- ICCS 2026},
+  year      = {2026},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {16783},
+  pages     = {80--94},
+  publisher = {Springer Nature Switzerland},
+  doi       = {10.1007/978-3-032-29921-5_6}
+}
+```
