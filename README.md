@@ -1,4 +1,4 @@
-# PU-ResMLP
+# 1d_pure
 
 PyTorch implementations of **Product-Unit Residual Networks (PURe)** for
 nonlinear regression and input-level interaction analysis. The project includes
@@ -32,8 +32,8 @@ Use Python 3.12, the version used for the repository checks. Run commands from
 the repository root.
 
 ```bash
-git clone https://github.com/ziyuan-li/PU-ResMLP.git
-cd PU-ResMLP
+git clone https://github.com/ziyuan-li/1d_pure.git
+cd 1d_pure
 python -m venv .venv
 ```
 
