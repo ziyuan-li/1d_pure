@@ -1,6 +1,6 @@
 {
   "noise_space": "standardized feature space",
-  "perturbed_columns": "continuous ordinary features only; context and binary one-hot columns fixed",
+  "perturbed_columns": "ordinary numerical columns with more than two distinct training values; context, binary, and one-hot columns fixed",
   "noise_levels": [
     0.0,
     0.02,

@@ -487,7 +487,7 @@ def main() -> int:
     auc_effects.to_csv(args.output_dir / output_files[5], index=False)
     protocol = {
         "noise_space": "standardized feature space",
-        "perturbed_columns": "continuous ordinary features only; context and binary one-hot columns fixed",
+        "perturbed_columns": "ordinary numerical columns with more than two distinct training values; context, binary, and one-hot columns fixed",
         "noise_levels": sorted(args.noise_levels),
         "corruption_seeds": args.corruption_seeds,
         "training_seeds": args.training_seeds,

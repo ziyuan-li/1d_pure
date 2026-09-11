@@ -1,1 +1,1 @@
-"""PU-ResMLP research code for product-unit residual networks."""
+"""PURe: product-unit residual networks for nonlinear regression."""

@@ -1,4 +1,4 @@
 dataset,model,context_ablation,metric,n_pairs,mean_ablation_minus_full,ci_2.5,ci_97.5
-bike_sharing,rv_pure,bike_no_calendar,test_mae,3,27.009852570686288,10.156519998477975,45.229623746268345
+bike_sharing,rv_pure,bike_no_calendar,test_mae,3,27.00985257068628,10.156519998477975,45.22962374626834
 bike_sharing,rv_pure,bike_no_time,test_mae,3,72.34683595546873,67.08872593176243,75.39815295826305
 bike_sharing,rv_pure,bike_no_weather,test_mae,3,-6.370039346165984,-17.62668913609688,0.3213544457087636

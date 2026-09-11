@@ -1,4 +1,4 @@
-# Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Network
+# Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Networks
 
 Ziyuan Li, Uwe Jaekel, and Babette Dellen
 
@@ -17,7 +17,7 @@ The manuscript extends our ICCS 2026 paper,
 The [conference preprint](https://arxiv.org/abs/2606.06861) is also available.
 
 [Experiment results](artifacts/reports/jocs_v1/README.md) ·
-[Scientific CV-MLP comparison](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md) ·
+[Five-model scientific benchmark](artifacts/reports/jocs_v1/table1_benchmark.csv) ·
 [Dataset setup](data/raw/README.md) · [Citation](#citation)
 
 ## Experiments
@@ -70,6 +70,38 @@ The single-run trainer supports CPU and CUDA. GPU runs require a CUDA-enabled
 PyTorch installation. The suite launchers use CUDA devices selected with
 `--gpus`; use `--gpus 0` for one GPU or `--gpus 0 1` for two.
 
+The paper runs used Linux, Python 3.12.3, PyTorch 2.7.1 with CUDA 11.8, and
+NVIDIA Tesla V100-SXM2-32GB GPUs. The recorded core versions are in
+[`environment.json`](artifacts/reports/jocs_v1/environment.json). To use those
+core versions in a separate Python 3.12 environment:
+
+```bash
+python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu118
+python -m pip install -r requirements-paper.txt
+```
+
+`requirements.txt` supports a general installation; `requirements-paper.txt`
+pins the recorded training packages. Plotting, spreadsheet readers, and test
+tools were not versioned in the original run metadata.
+
+## Reproduce the reported tables and figures
+
+Per-training-seed metrics, attribution resamples, context-map scores, noise
+evaluations, learning-curve records, and inference measurements are included.
+After installation, a fresh clone can rebuild the result tables and four
+experimental figures without checkpoints, dataset downloads, or a GPU:
+
+```bash
+python -m pure_resmlp.evaluation.rebuild_reports
+python -m pure_resmlp.evaluation.redraw_jocs_figures --report-dir artifacts/reports/reproduced
+```
+
+Outputs go to `artifacts/reports/reproduced/`, leaving the versioned results
+unchanged. For another run, pass a new `--output-dir` to `rebuild_reports` and
+use the same path as `--report-dir` when drawing figures. This recomputes
+summaries from saved measurements; reproducing training requires the data and
+commands below.
+
 ## Data
 
 Friedman and the interaction-recovery datasets are generated in code. Concrete
@@ -101,22 +133,25 @@ For example, train CV-PURe on Friedman:
 python -m pure_resmlp.training.run_experiment --experiment jocs_benchmark_v1 --dataset friedman --model cv_pure --seed 0 --split-seed 0 --hidden-dim 64 --epochs 200 --patience 20 --batch-size 128
 ```
 
-The four-model grid uses `mlp`, `resmlp`, `rv_pure`, and `cv_pure` on
+The scientific comparison evaluates five models: `mlp`, `resmlp`, `rv_pure`,
+`cv_mlp`, and `cv_pure`. The first training grid stores the four models
+`mlp`, `resmlp`, `rv_pure`, and `cv_pure` on
 `friedman`, `concrete`, `california`, `energy`, `yacht`, and `auto_mpg`, each with
-training seeds 0–4. Real models use width 128; CV-PURe uses width 64. Energy
+training seeds 0–4. Real models use width 128; both complex models use width 64. Energy
 uses heating load (`--energy-target Y1`). The default learning rate is 0.001.
 
-Scientific CV-MLP is a separate addition at width 64 under the same scientific
-training settings. Its launcher first checks the existing CV-PURe baseline
+CV-MLP uses the same scientific training settings. Its launcher first checks
+the existing CV-PURe baseline
 configurations and split indices:
 
 ```bash
 python -m pure_resmlp.training.run_scientific_cv_mlp --gpus 0
 ```
 
-This adds 30 CV-MLP runs. Its five-model results are in
-[`jocs_scientific_cv_mlp_v1`](artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md);
-the original four-model tables remain in `jocs_v1`.
+The 30 CV-MLP runs and 120 runs from the first grid are combined in the
+[scientific results table](artifacts/reports/jocs_v1/table1_benchmark.csv).
+Their run-directory names remain unchanged so that saved checkpoints retain
+their existing paths.
 
 ### Context-aware prediction
 
@@ -151,8 +186,9 @@ names identify the directories expected by the summary scripts.
 
 ## Evaluation
 
-Evaluation requires the saved run artifacts and source datasets. A fresh clone
-contains result summaries, but not trained checkpoints.
+Evaluating predictors again requires saved run artifacts and source datasets.
+The commands above rebuild tables from the included records; the commands
+below evaluate checkpoints, which are not included in Git.
 
 ### Interaction analysis
 
@@ -170,7 +206,7 @@ synthetic tasks with known interacting pairs.
 ### Input-noise robustness
 
 ```bash
-python -m pure_resmlp.evaluation.evaluate_noise_robustness
+python -m pure_resmlp.evaluation.evaluate_noise_robustness --output-dir artifacts/reports/rerun/robustness
 ```
 
 Noise evaluation uses levels 0, 0.02, 0.05, and 0.10 without retraining.
@@ -184,7 +220,7 @@ this evaluation. See the
 
 ```bash
 python -m pure_resmlp.training.run_sample_efficiency_suite --gpus 0
-python -m pure_resmlp.evaluation.summarize_sample_efficiency
+python -m pure_resmlp.evaluation.summarize_sample_efficiency --output-dir artifacts/reports/rerun/sample_efficiency
 ```
 
 Training adds nested 10%, 25%, and 50% subsets and reuses the existing 100%
@@ -195,7 +231,7 @@ See the [AULC results](artifacts/reports/jocs_v1/sample_efficiency/sample_effici
 ### Inference efficiency
 
 ```bash
-python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0
+python -m pure_resmlp.evaluation.benchmark_inference --device cuda:0 --output-dir artifacts/reports/rerun/inference_efficiency
 ```
 
 The benchmark measures synchronized, repeated full-test inference on Friedman,
@@ -208,15 +244,17 @@ were measured on a single NVIDIA Tesla V100-SXM2-32GB.
 After completing all required training runs and interaction analyses:
 
 ```bash
-python -m pure_resmlp.evaluation.summarize_jocs --runs-root artifacts/runs --output-dir artifacts/reports/jocs_v1
-python -m pure_resmlp.evaluation.redraw_jocs_figures
+python -m pure_resmlp.evaluation.summarize_jocs --runs-root artifacts/runs --output-dir artifacts/reports/rerun
+python -m pure_resmlp.evaluation.redraw_jocs_figures --report-dir artifacts/reports/rerun
 python -m pure_resmlp.evaluation.audit_checkpoints --runs-root artifacts/runs --strict
 python -m pure_resmlp.evaluation.audit_scientific_cv_mlp --device cuda:0
 ```
 
-The main summarizer expects the complete 226-run grid and its interaction
-outputs. Figure redrawing also requires the noise and sample-efficiency
-summaries. Scientific CV-MLP results and their checkpoint audit are separate.
+The main summarizer expects 256 runs, including the 30 scientific CV-MLP
+runs, and the interaction outputs. It also exports the context-map scores.
+Figure redrawing requires the noise and sample-efficiency summaries.
+Evaluation examples use `artifacts/reports/rerun/` to keep new measurements
+separate from the paper results; choose a new directory for subsequent reruns.
 Use `--help` on any entry point for its options.
 
 ## Tests
@@ -247,15 +285,15 @@ tests/           Model, data, protocol, and recording tests
 data/            Included Concrete data and local dataset downloads
 artifacts/
   runs/          Local checkpoints and per-run outputs
-  reports/       Versioned result summaries and evaluation protocols
+  reports/       Per-seed records, result summaries, and evaluation protocols
 ```
 
 Each run saves configuration, environment information, split indices, training
 history, predictions, metrics, a checkpoint, and a completion manifest under
 `artifacts/runs/<experiment>/<dataset>/<model>/seed_<seed>/`.
 
-Git includes the experiment code, dependencies, tests, data instructions, and
-selected result summaries. Downloaded datasets, checkpoints, generated figures,
+Git includes the experiment code, dependencies, tests, data instructions,
+per-seed result records, and summaries. Downloaded datasets, checkpoints, generated figures,
 and temporary files remain local. Manuscripts and submission materials are
 outside the published repository scope.
 

@@ -12,6 +12,8 @@ import pandas as pd
 
 
 BENCHMARK_EXPERIMENT = "jocs_benchmark_v1"
+SCIENTIFIC_CV_MLP_EXPERIMENT = "jocs_scientific_cv_mlp_v1"
+SCIENTIFIC_EXPERIMENTS = (BENCHMARK_EXPERIMENT, SCIENTIFIC_CV_MLP_EXPERIMENT)
 BENCHMARK_DATASETS = (
     "friedman",
     "concrete",
@@ -38,6 +40,7 @@ EXPECTED_MANIFESTS = {
     BENCHMARK_EXPERIMENT: (
         len(BENCHMARK_DATASETS) * len(BENCHMARK_MODELS) * len(BENCHMARK_SEEDS)
     ),
+    SCIENTIFIC_CV_MLP_EXPERIMENT: len(BENCHMARK_DATASETS) * len(BENCHMARK_SEEDS),
     SYNTHETIC_EXPERIMENT: 24,
     "jocs_bike_context_v1": 30,
     "jocs_parkinsons_context_v1": 30,
@@ -87,7 +90,7 @@ def collect_runs(root: Path) -> pd.DataFrame:
                 metrics.get("test_r2") is not None and metrics["test_r2"] < 0
             )
             interaction_path = run_dir / "interaction_metrics.json"
-            if experiment != BENCHMARK_EXPERIMENT and not interaction_path.is_file():
+            if experiment not in SCIENTIFIC_EXPERIMENTS and not interaction_path.is_file():
                 raise RuntimeError(f"missing interaction metrics: {run_dir}")
             if interaction_path.is_file():
                 interactions = _load_json(interaction_path)
@@ -119,6 +122,16 @@ def collect_runs(root: Path) -> pd.DataFrame:
             "benchmark composition does not match the frozen protocol; "
             f"missing={missing[:5]}, unexpected={unexpected[:5]}"
         )
+    scientific_cv = frame[frame["experiment"] == SCIENTIFIC_CV_MLP_EXPERIMENT]
+    expected_cv_runs = {
+        (dataset, "cv_mlp", seed)
+        for dataset in BENCHMARK_DATASETS
+        for seed in BENCHMARK_SEEDS
+    }
+    if set(scientific_cv[["dataset", "model", "seed"]].itertuples(
+        index=False, name=None
+    )) != expected_cv_runs or not scientific_cv["split_seed"].eq(0).all():
+        raise RuntimeError("scientific CV-MLP composition differs from the protocol")
     controls = frame[frame["experiment"] == CV_BASELINE_EXPERIMENT]
     actual_control_runs = set(
         controls[["dataset", "model", "seed"]].itertuples(index=False, name=None)
@@ -348,11 +361,21 @@ def markdown_table(
     return "\n".join(lines)
 
 
-def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
+def write_outputs(
+    frame: pd.DataFrame,
+    output_dir: Path,
+    *,
+    interaction_resamples: pd.DataFrame | None = None,
+) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    frame.to_csv(output_dir / "all_runs.csv", index=False)
+    portable = frame.copy()
+    portable["run_dir"] = [
+        f"artifacts/runs/{row.experiment}/{row.dataset}/{row.model}/seed_{row.seed}"
+        for row in frame.itertuples()
+    ]
+    portable.to_csv(output_dir / "all_runs.csv", index=False)
 
-    benchmark_runs = frame[frame["experiment"] == BENCHMARK_EXPERIMENT]
+    benchmark_runs = frame[frame["experiment"].isin(SCIENTIFIC_EXPERIMENTS)]
     benchmark = aggregate(
         benchmark_runs,
         ["dataset", "model"],
@@ -401,7 +424,11 @@ def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
     )
     synthetic.to_csv(output_dir / "table3_synthetic.csv", index=False)
 
-    robustness_long = collect_interaction_robustness(frame)
+    robustness_long = (
+        collect_interaction_robustness(frame)
+        if interaction_resamples is None else interaction_resamples
+    )
+    robustness_long.to_csv(output_dir / "interaction_resamples.csv", index=False)
     robustness = aggregate_interaction_robustness(robustness_long)
     robustness.to_csv(
         output_dir / "table3_synthetic_interaction_robustness.csv", index=False
@@ -445,6 +472,20 @@ def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
         ),
         paired_effects(
             context_runs,
+            group_columns=["dataset"],
+            baseline="cv_mlp",
+            candidates=("cv_pure",),
+            metric="test_rmse",
+        ),
+        paired_effects(
+            benchmark_runs,
+            group_columns=["dataset"],
+            baseline="mlp",
+            candidates=("cv_mlp",),
+            metric="test_rmse",
+        ),
+        paired_effects(
+            benchmark_runs,
             group_columns=["dataset"],
             baseline="cv_mlp",
             candidates=("cv_pure",),
@@ -510,51 +551,11 @@ def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
         )
 
     report = [
-        "# PURe JoCS 正式实验自动汇总",
+        "# PURe experiment results",
         "",
-        f"完整正式运行：{len(frame)}。本文件由保存的运行结果生成，不包含 pilot/smoke。",
+        f"Summary of {len(frame)} saved training runs.",
         "",
-        "## Table 1：Scientific benchmark",
-        "",
-        markdown_table(
-            benchmark_display,
-            [
-                ("dataset", "Dataset"),
-                ("model", "Model"),
-                ("test_mae", "MAE"),
-                ("test_rmse", "RMSE"),
-                ("test_r2", "R²"),
-            ],
-        ),
-        "",
-        "## Table 2：Context main results",
-        "",
-        markdown_table(
-            context_display,
-            [
-                ("dataset", "Dataset"),
-                ("model", "Model"),
-                ("test_mae", "MAE"),
-                ("test_rmse", "RMSE"),
-                ("test_r2", "R²"),
-                ("failures", "R²<0 runs"),
-            ],
-        ),
-        "",
-        "## Table 2b：Context ablations",
-        "",
-        markdown_table(
-            ablation_display,
-            [
-                ("dataset", "Dataset"),
-                ("context_ablation", "Ablation"),
-                ("test_mae", "MAE"),
-                ("test_rmse", "RMSE"),
-                ("test_r2", "R²"),
-            ],
-        ),
-        "",
-        "## Table 3：Synthetic interaction recovery",
+        "## Synthetic interaction recovery (sampling seed 0)",
         "",
         markdown_table(
             synthetic_display,
@@ -568,7 +569,7 @@ def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
             ],
         ),
         "",
-        "## Table 3b：Interaction attribution sampling robustness",
+        "## Synthetic interaction recovery (sampling seeds 0–4)",
         "",
         "Five reference-sampling seeds per saved model; these are attribution "
         "resamples, not additional training runs.",
@@ -586,6 +587,46 @@ def write_outputs(frame: pd.DataFrame, output_dir: Path) -> None:
             ],
         ),
         "",
+        "## Scientific regression",
+        "",
+        markdown_table(
+            benchmark_display,
+            [
+                ("dataset", "Dataset"),
+                ("model", "Model"),
+                ("test_mae", "MAE"),
+                ("test_rmse", "RMSE"),
+                ("test_r2", "R²"),
+            ],
+        ),
+        "",
+        "## Context-aware prediction",
+        "",
+        markdown_table(
+            context_display,
+            [
+                ("dataset", "Dataset"),
+                ("model", "Model"),
+                ("test_mae", "MAE"),
+                ("test_rmse", "RMSE"),
+                ("test_r2", "R²"),
+                ("failures", "R²<0 runs"),
+            ],
+        ),
+        "",
+        "## Context ablations",
+        "",
+        markdown_table(
+            ablation_display,
+            [
+                ("dataset", "Dataset"),
+                ("context_ablation", "Ablation"),
+                ("test_mae", "MAE"),
+                ("test_rmse", "RMSE"),
+                ("test_r2", "R²"),
+            ],
+        ),
+        "",
     ]
     (output_dir / "summary.md").write_text("\n".join(report), encoding="utf-8")
 
@@ -597,6 +638,11 @@ def main() -> int:
     args = parser.parse_args()
     frame = collect_runs(args.runs_root)
     write_outputs(frame, args.output_dir)
+    from pure_resmlp.evaluation.plot_jocs import collect_context_interactions
+
+    collect_context_interactions(args.runs_root).to_csv(
+        args.output_dir / "context_interactions.csv", index=False
+    )
     print(
         json.dumps(
             {

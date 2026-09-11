@@ -1,0 +1,7 @@
+# Recorded core package versions for the paper's Linux/Python 3.12.3 runs.
+# Install the CUDA 11.8 PyTorch wheel first; see README.
+-r requirements.txt
+torch==2.7.1+cu118
+pandas==2.3.3
+scikit-learn==1.8.0
+scipy==1.16.3

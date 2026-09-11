@@ -94,8 +94,7 @@ def _mean_interaction_matrix(
     return pd.DataFrame(values, index=matrices[0].index, columns=matrices[0].columns)
 
 
-def figure2_context(runs_root: Path, report_dir: Path) -> None:
-    specifications = (
+CONTEXT_MAP_SPECIFICATIONS = (
         (
             "jocs_bike_context_v1", "bike_sharing",
             ["temp", "atemp", "hum", "windspeed"],
@@ -112,13 +111,57 @@ def figure2_context(runs_root: Path, report_dir: Path) -> None:
             ["subject", "age", "sex", "test_time"],
             "Parkinsons Telemonitoring",
         ),
-    )
-    compared_models = ("mlp_context", "rv_pure", "cv_pure")
+)
+CONTEXT_MAP_MODELS = ("mlp_context", "rv_pure", "cv_pure")
+
+
+def collect_context_interactions(runs_root: Path) -> pd.DataFrame:
+    """Export the per-checkpoint ordinary--context scores used in the maps."""
+    records = []
+    for experiment, dataset, ordinary, context, _ in CONTEXT_MAP_SPECIFICATIONS:
+        for model in CONTEXT_MAP_MODELS:
+            for seed in range(5):
+                path = (runs_root / experiment / dataset / model
+                        / f"seed_{seed}" / "interaction_matrix.csv")
+                matrix = pd.read_csv(path, index_col=0).loc[ordinary, context]
+                for feature in ordinary:
+                    for context_feature in context:
+                        records.append({
+                            "dataset": dataset, "model": model,
+                            "training_seed": seed, "sampling_seed": 0,
+                            "ordinary_feature": feature,
+                            "context_feature": context_feature,
+                            "interaction_strength": float(matrix.loc[feature, context_feature]),
+                        })
+    return pd.DataFrame.from_records(records)
+
+
+def mean_published_interactions(
+    scores: pd.DataFrame, dataset: str, model: str,
+) -> pd.DataFrame:
+    selected = scores.loc[(scores["dataset"] == dataset) & (scores["model"] == model)]
+    pairs = ["ordinary_feature", "context_feature"]
+    if selected.empty or not selected["sampling_seed"].eq(0).all():
+        raise ValueError(f"missing or invalid context scores: {dataset}/{model}")
+    for _, values in selected.groupby(pairs, sort=False):
+        if len(values) != 5 or set(values["training_seed"]) != set(range(5)):
+            raise ValueError(f"context scores need five training seeds: {dataset}/{model}")
+    return selected.groupby(pairs)["interaction_strength"].mean().unstack()
+
+
+def figure2_context(runs_root: Path, report_dir: Path) -> None:
+    source = report_dir / "context_interactions.csv"
+    scores = pd.read_csv(source) if source.is_file() else None
+    compared_models = CONTEXT_MAP_MODELS
     fig, axes = plt.subplots(2, 3, figsize=(FULL_WIDTH, 6.05), constrained_layout=True)
 
-    for row, (experiment, dataset, ordinary, context, dataset_label) in enumerate(specifications):
+    for row, (experiment, dataset, ordinary, context, dataset_label) in enumerate(CONTEXT_MAP_SPECIFICATIONS):
         selected = {
-            model: _mean_interaction_matrix(runs_root, experiment, dataset, model).loc[ordinary, context]
+            model: (
+                mean_published_interactions(scores, dataset, model)
+                if scores is not None
+                else _mean_interaction_matrix(runs_root, experiment, dataset, model)
+            ).loc[ordinary, context]
             for model in compared_models
         }
         vmax = max(float(matrix.to_numpy().max()) for matrix in selected.values())
