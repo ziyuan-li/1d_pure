@@ -37,9 +37,9 @@ recorded in [environment.json](environment.json).
 - Inference: four scientific models on Friedman, Yacht, and Auto MPG.
 
 `all_runs.csv` contains 256 distinct main/ablation training runs. The 30
-scientific CV-MLP runs are included in this total. Their original launcher
-records remain under `../jocs_scientific_cv_mlp_v1/`; the table in this directory
-is the consolidated scientific comparison.
+scientific CV-MLP runs are included in this total, and `table1_benchmark.csv`
+contains the consolidated five-model scientific comparison. Per-launcher
+exports and checkpoint-audit logs are generated locally and are not versioned.
 
 `interaction_resamples.csv` contains 135 attribution evaluations: 27 synthetic
 checkpoints, each evaluated with five sampling seeds. The recovery summary uses

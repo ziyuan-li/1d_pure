@@ -293,9 +293,10 @@ history, predictions, metrics, a checkpoint, and a completion manifest under
 `artifacts/runs/<experiment>/<dataset>/<model>/seed_<seed>/`.
 
 Git includes the experiment code, dependencies, tests, data instructions,
-per-seed result records, and summaries. Downloaded datasets, checkpoints, generated figures,
-and temporary files remain local. Manuscripts and submission materials are
-outside the published repository scope.
+per-seed result records, and summaries. Downloaded datasets, checkpoints,
+generated figures, per-launcher exports, checkpoint-audit logs, and temporary
+files remain local. Manuscripts and submission materials are outside the
+published repository scope.
 
 ## Citation
 

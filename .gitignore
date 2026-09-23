@@ -148,11 +148,6 @@ venv.bak/
 !/artifacts/reports/jocs_v1/inference_efficiency/inference_timings_summary.csv
 !/artifacts/reports/jocs_v1/inference_efficiency/inference_timings_raw.csv
 !/artifacts/reports/jocs_v1/inference_efficiency/protocol.json
-!/artifacts/reports/jocs_scientific_cv_mlp_v1/
-/artifacts/reports/jocs_scientific_cv_mlp_v1/*
-!/artifacts/reports/jocs_scientific_cv_mlp_v1/summary.json
-!/artifacts/reports/jocs_scientific_cv_mlp_v1/summary.md
-!/artifacts/reports/jocs_scientific_cv_mlp_v1/audit.json
 
 # Local writing, submission materials, and compiled documents
 /docs/

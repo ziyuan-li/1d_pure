@@ -79,7 +79,7 @@ def main() -> int:
     (args.report_dir / "audit.json").write_text(json.dumps({
         "experiment": EXPERIMENT, "runs_checked": len(records), "status": "passed",
         "checks": "Checkpoint reload; baseline-identical splits/scalers; prediction replay; "
-                  "recomputed metrics; validation-selected epoch; parameter count. No hashing.",
+                  "recomputed metrics; validation-selected epoch; parameter count.",
         "records": records,
     }, indent=2) + "\n", encoding="utf-8")
     return 0

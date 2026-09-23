@@ -138,8 +138,8 @@ def summarize(root: Path, report_dir: Path) -> None:
     models = ("mlp", "resmlp", "rv_pure", "cv_mlp", "cv_pure")
     labels = ("MLP", "ResMLP", "RV-PURe", "CV-MLP", "CV-PURe")
     rows = []
-    text = ["# Scientific regression: CV-MLP addition", "",
-            "Five-model comparison; the original four-model tables are stored separately.",
+    text = ["# Scientific regression: five-model comparison", "",
+            "Local export from saved checkpoints. The consolidated paper results are in jocs_v1.",
             "Split seed 0; training seeds 0-4. Test RMSE: mean and sample SD (ddof=1).", "",
             "| Dataset | " + " | ".join(labels) + " |",
             "| --- | " + " | ".join(["---:"] * len(models)) + " |"]
