@@ -13,7 +13,7 @@ learned by the models. The PyTorch implementation includes real-valued PURe
 MLP, and DCNv2.
 
 The manuscript extends our ICCS 2026 paper,
-[Modeling Nonlinear Feature Interactions with Product-Unit Residual Networks](https://doi.org/10.1007/978-3-032-29921-5_6).
+[Modeling Nonlinear Feature Interactions with Product-Unit Residual Networks](https://link.springer.com/chapter/10.1007/978-3-032-29921-5_6).
 The [conference preprint](https://arxiv.org/abs/2606.06861) is also available.
 
 [Experiment results](artifacts/reports/jocs_v1/README.md) ·
