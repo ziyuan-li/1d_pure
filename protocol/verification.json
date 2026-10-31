@@ -86,5 +86,32 @@
     "Enable equal-timestamp grouping by default in the Parkinsons loader, matching all recorded fits.",
     "Allow evaluation, prediction and timing of an explicitly selected newly trained checkpoint.",
     "Export run identifiers, actual checkpoint hashes and sampled indices with evaluation records."
-  ]
+  ],
+  "scope_cleanup": {
+    "status": "passed",
+    "python_files_retained": 27,
+    "removed_files": [
+      "pure_resmlp/experiment/__init__.py",
+      "pure_resmlp/experiment/recording.py"
+    ],
+    "removed_unused_helpers": {
+      "pure_resmlp/evaluation/plot_style.py": [
+        "panel_label"
+      ],
+      "pure_resmlp/evaluation/style_paper_figures.py": [
+        "digest"
+      ],
+      "pure_resmlp/evaluation/finite_difference_interactions.py": [
+        "summarize_recovery_resamples"
+      ]
+    },
+    "unused_import_bindings_removed": 24,
+    "retained_executable_definitions_unchanged": true,
+    "paper_run_configurations": 1215,
+    "unit_tests_passed": 10,
+    "smoke_training_epochs": 2,
+    "reaggregated_records_matched": 29,
+    "manuscript_tables_matched": 10,
+    "figures_with_identical_rendered_pixels": 6
+  }
 }

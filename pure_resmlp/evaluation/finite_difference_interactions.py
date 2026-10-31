@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Any, Callable, Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 import numpy as np
 PredictFunction = Callable[[np.ndarray], np.ndarray]
 
@@ -73,15 +73,3 @@ def interaction_recovery_metrics(result: InteractionResult, true_pairs: Sequence
     true_positive = len(selected & truth)
     ranks = [rank for rank, (left, right, _score) in enumerate(ranked, start=1) if frozenset((left, right)) in truth]
     return {'precision_at_k': true_positive / k, 'recall_at_k': true_positive / len(truth), 'true_interaction_mean_rank': float(np.mean(ranks))}
-
-def summarize_recovery_resamples(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    if not records:
-        raise ValueError('recovery resample records cannot be empty')
-    metric_names = ('precision_at_k', 'recall_at_k', 'true_interaction_mean_rank')
-    summary: dict[str, Any] = {'resamples': len(records), 'metrics': {}}
-    for name in metric_names:
-        values = np.asarray([float(record[name]) for record in records])
-        summary['metrics'][name] = {'mean': float(values.mean()), 'std': float(values.std(ddof=1)) if len(values) > 1 else 0.0, 'min': float(values.min()), 'max': float(values.max())}
-    exact = np.asarray([float(record['precision_at_k']) == 1.0 and float(record['recall_at_k']) == 1.0 for record in records], dtype=np.float64)
-    summary['exact_recovery_rate'] = float(exact.mean())
-    return summary

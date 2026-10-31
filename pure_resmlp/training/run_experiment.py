@@ -1,20 +1,14 @@
 from __future__ import annotations
-import argparse
-import json
 import random
-import time
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.utils.data import DataLoader, TensorDataset
-from pure_resmlp.data import PreparedData, prepare_benchmark, prepare_bike_sharing, prepare_parkinsons_telemonitoring, prepare_synthetic_interactions, subset_prepared_training_data
-from pure_resmlp.experiment import RunConfig, RunRecorder
+from pure_resmlp.data import PreparedData
 from pure_resmlp.models import ComplexPUResNet1D, DCNv2Regressor, MLPResNet, RealPUResNet1D, build_mlp, build_complex_mlp, explicit_ordinary_context_crosses
-from pure_resmlp.paths import RUNS_DIR
 CONTEXT_ABLATIONS = {'none': (), 'bike_no_time': ('hr', 'mnth'), 'bike_no_calendar': ('workingday', 'holiday', 'weekday'), 'bike_no_weather': ('season', 'weathersit')}
 
 @dataclass(frozen=True)

@@ -29,7 +29,7 @@
     "source": "pure_resmlp/models/mlp.py",
     "source_sha256": "0005e8cc3f2e66f5ed179f058767fc07c54d55311e26f044c2e748aaa9fe15bf",
     "release": "pure_resmlp/models/mlp.py",
-    "release_sha256": "4a06ea06a5034fdca5cdbbb4df69397a19ac328d6b4ddbb1fd848c2eec7ad2fc",
+    "release_sha256": "f44f5aca1c941e482db5b4849da6c8cd129c6fe7bd60e54acc140d0a5f0c6f81",
     "adaptation": "Renamed legacy four-layer identifiers to reflect the seven-hidden-layer MLP implementations; tensor keys and calculations preserved."
   },
   {
@@ -43,7 +43,7 @@
     "source": "pure_resmlp/models/residual_mlp.py",
     "source_sha256": "6a4c0592f378e1f892518d4816be3f1b211f520e8005b98b71f029a87bd5a1f4",
     "release": "pure_resmlp/models/residual_mlp.py",
-    "release_sha256": "0749f7a7bc24589d20410fe72077948de6fb951010b704a5f839cd6977e45b01"
+    "release_sha256": "db84ee541abb9e68c61c28ebbe11f020cec41e17ec0158233d1e2e145f15e7f9"
   },
   {
     "source": "pure_resmlp/models/__init__.py",
@@ -56,7 +56,7 @@
     "source": "pure_resmlp/data/datasets.py",
     "source_sha256": "25edd6177b7315d7817f6dd3dd27fe70edb8d550b992fe2f67a5387d23766606",
     "release": "pure_resmlp/data/datasets.py",
-    "release_sha256": "417bc6dbe3b59c64fb77d757c854ce0fac7a9eff0cd3ef3dbef3494bee93f757",
+    "release_sha256": "200dd813cc6592c0b87b54f379a24941983c1572d5373f1208f2fb8f8a3d2195",
     "adaptation": "Enabled strict_time_groups by default for direct Parkinsons loader calls; all recorded manuscript runs already selected this setting explicitly."
   },
   {
@@ -72,22 +72,10 @@
     "release_sha256": "d377d7db8b8ce089d6f1ceba5b9d09592e6c6c0f65b53b324044008261777303"
   },
   {
-    "source": "pure_resmlp/experiment/__init__.py",
-    "source_sha256": "a3488f10a42e286951c69fee38fe959a735a1090a4f38c230d3128fd5d9c2078",
-    "release": "pure_resmlp/experiment/__init__.py",
-    "release_sha256": "a170df1a17d411994346eed134a2f341c08f15416bef75571a6b43d0779f65ea"
-  },
-  {
-    "source": "pure_resmlp/experiment/recording.py",
-    "source_sha256": "759fa560148b4a4d70905ca992d4255131efa197d79c78e0dcf5ccf6fc2fe01a",
-    "release": "pure_resmlp/experiment/recording.py",
-    "release_sha256": "b9766a1d861c8ba72b04a2887c375031e962df9f0cbf1f694637ccf7cd51f5d3"
-  },
-  {
     "source": "pure_resmlp/evaluation/finite_difference_interactions.py",
     "source_sha256": "5de555001c1e4fdeb15df6fa6ea9a8d751d726bdbf78cf4daecb0fec6998dbcc",
     "release": "pure_resmlp/evaluation/finite_difference_interactions.py",
-    "release_sha256": "0cc0c27cc150d1e5b335c739e45e0eb7c87d4cb6e54b10fe4304a21dbae40745"
+    "release_sha256": "a7379b73ee58e2bec45be443246f8ff196153f6a6fb11100d87e4cd8978a1942"
   },
   {
     "source": "pure_resmlp/evaluation/scientific_interaction_summary.py",
@@ -99,26 +87,26 @@
     "source": "pure_resmlp/evaluation/plot_style.py",
     "source_sha256": "751af48deef7764b6259e36e5c9f0142c84d01bf88abefac3243c7031b0e2b81",
     "release": "pure_resmlp/evaluation/plot_style.py",
-    "release_sha256": "f13a3d6901b367bf174f4ff48776801a655511caaac6fce65557e8bcf4798502"
+    "release_sha256": "5ca03725f1cf4e13122c0093a7c894934abec0e0d4161287bd34ba78361790b3"
   },
   {
     "source": "pure_resmlp/training/run_experiment.py",
     "source_sha256": "407a41d1e90967b704909f7a50755352cf4bdef79978e4c82dcd3f397376243b",
     "release": "pure_resmlp/training/run_experiment.py",
-    "release_sha256": "53ee0dd1b82a6fd3336f1757912bda2bc5bc61989201a775586cf01480ef1031",
+    "release_sha256": "29b84761a22dc3077c4b173436e3ad026ff461bad291cfe9debc646ac2af50f4",
     "adaptation": "Renamed legacy four-layer identifiers to reflect the seven-hidden-layer MLP implementations; tensor keys and calculations preserved."
   },
   {
     "source": "pure_resmlp/training/run_table3_split0.py",
     "source_sha256": "3af215bf90c1a674a42c0ff51be90ceba8988bb1f821f34852d455a5117e8ef8",
     "release": "pure_resmlp/models/shortcut.py",
-    "release_sha256": "f2a05adf547425c69bd3a0089d241a40863b344a6ff117f34e4ab1060c574ba1"
+    "release_sha256": "ab41cde45d711db960d38be2e648acb9dc61e6253250ec16bf2e118a8a559324"
   },
   {
     "source": "pure_resmlp/evaluation/style_paper_figures.py",
     "source_sha256": "a27e27e9b6636759294ac4547651cfe22b939a12ba54bb51625d42d1a6f82330",
     "release": "pure_resmlp/evaluation/style_paper_figures.py",
-    "release_sha256": "cfe731ec66a079a868b4ad564d8a5c8dd83b23b9fc8e65bb5253f4b694ab4dc2"
+    "release_sha256": "f0fb0f1b7e65be384d4d848697eb3884c8d39e2711449b9eee1594448503fd5e"
   },
   {
     "source": "pure_resmlp/evaluation/evaluate_noise_robustness.py",

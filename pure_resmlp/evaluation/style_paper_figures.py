@@ -1,17 +1,11 @@
 from __future__ import annotations
-import argparse
-import hashlib
-import json
-from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Ellipse, FancyArrowPatch, FancyBboxPatch
 import numpy as np
-import pandas as pd
 from pure_resmlp.evaluation.plot_style import FULL_WIDTH, SINGLE_WIDTH, apply_publication_style, model_label, model_style, save_publication_figure
-from pure_resmlp.paths import PROJECT_ROOT
 SCIENCE = ('friedman', 'concrete', 'california', 'energy', 'yacht', 'auto_mpg')
 MODELS = ('mlp', 'resmlp', 'rv_pure', 'cv_mlp', 'cv_pure')
 CONTEXT = ('mlp_ordinary', 'mlp_context', 'mlp_explicit_cross', 'dcnv2_context', 'rv_pure', 'cv_mlp', 'cv_pure')
@@ -22,9 +16,6 @@ FEATURES = {'friedman': [f'$x_{{{i + 1}}}$' for i in range(10)], 'concrete': ['C
 MAP_SPEC = (('bike_sharing', ['temp', 'atemp', 'hum', 'windspeed'], ['hr', 'mnth', 'season', 'weathersit', 'weekday', 'workingday', 'holiday', 'yr'], ['Temperature', 'Feels-like temp.', 'Humidity', 'Wind speed'], ['Hour', 'Month', 'Season', 'Weather', 'Weekday', 'Working day', 'Holiday', 'Year']), ('parkinsons_telemonitoring', ['Jitter(%)', 'Jitter(Abs)', 'Jitter:RAP', 'Jitter:PPQ5', 'Jitter:DDP', 'Shimmer', 'Shimmer(dB)', 'Shimmer:APQ3', 'Shimmer:APQ5', 'Shimmer:APQ11', 'Shimmer:DDA', 'NHR', 'HNR', 'RPDE', 'DFA', 'PPE'], ['subject', 'age', 'sex', 'test_time'], None, ['Subject', 'Age', 'Sex', 'Time']))
 SOURCES = ('scientific_interactions/mean_maps.csv', 'context_interactions.csv', 'noise_summary.csv', 'learning_curves.csv')
 STEMS = ('pure_real_block_vertical', 'pure_network_architectures_vertical', 'figure_scientific_interactions', 'figure2_context_interactions', 'figure3_noise_robustness', 'figure4_sample_efficiency')
-
-def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def title(axis, label):
     axis.set_title(label, loc='left', fontweight='bold', pad=8)

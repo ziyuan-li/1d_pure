@@ -29,9 +29,6 @@ def model_style(model: str) -> dict[str, Any]:
 def model_label(model: str) -> str:
     return MODEL_LABELS.get(model, model.replace('_', ' ').title())
 
-def panel_label(axis: plt.Axes, label: str) -> None:
-    axis.text(-0.13, 1.06, label, transform=axis.transAxes, fontsize=9.0, fontweight='bold', ha='left', va='bottom')
-
 def save_publication_figure(fig: plt.Figure, output_dir: Path, stem: str, *, pad_inches: float=0.03) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     metadata = {'Creator': 'PURe JoCS reproducible figure pipeline'}
