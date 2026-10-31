@@ -1,0 +1,84 @@
+{
+  "feature_names": [
+    "X1",
+    "X2",
+    "X3",
+    "X4",
+    "X5",
+    "X6",
+    "X7",
+    "X8"
+  ],
+  "feature_groups": {
+    "X1": [
+      0
+    ],
+    "X2": [
+      1
+    ],
+    "X3": [
+      2
+    ],
+    "X4": [
+      3
+    ],
+    "X5": [
+      4
+    ],
+    "X6": [
+      5
+    ],
+    "X7": [
+      6
+    ],
+    "X8": [
+      7
+    ]
+  },
+  "feature_group_roles": {
+    "X1": "ordinary",
+    "X2": "ordinary",
+    "X3": "ordinary",
+    "X4": "ordinary",
+    "X5": "ordinary",
+    "X6": "ordinary",
+    "X7": "ordinary",
+    "X8": "ordinary"
+  },
+  "target_name": "Y1",
+  "x_scaler_mean": [
+    0.7624767225325878,
+    673.2253258845437,
+    319.3212290502793,
+    176.9520484171322,
+    5.240223463687151,
+    3.467411545623836,
+    0.23845437616387494,
+    2.824953445065177
+  ],
+  "x_scaler_scale": [
+    0.10517526349070061,
+    88.13967812245899,
+    43.1198113870806,
+    44.98182858326366,
+    1.7499726910262627,
+    1.1049909645546956,
+    0.13355487041642503,
+    1.5254181731731151
+  ],
+  "y_scaler_mean": [
+    22.37775791433892
+  ],
+  "y_scaler_scale": [
+    10.009008400213641
+  ],
+  "split_indices": "protocol/splits/f8ce6de1ad4171b2a2498f1c8ec36ce162c28f83216e6a472782de8547cae7ca.npz",
+  "split_sha256": "111e03fd8624dd543ee64e20dcf8d65429a715e365c1d3cf5a3d27a93c3decc2",
+  "partition_sizes": {
+    "train": 537,
+    "validation": 115,
+    "test": 116
+  },
+  "true_pairs": [],
+  "interaction_groups": []
+}

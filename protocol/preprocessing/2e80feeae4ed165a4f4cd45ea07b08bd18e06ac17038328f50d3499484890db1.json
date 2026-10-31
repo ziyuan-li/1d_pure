@@ -1,0 +1,70 @@
+{
+  "feature_names": [
+    "longitudinal_position_center_buoyancy",
+    "prismatic_coefficient",
+    "length_displacement_ratio",
+    "beam_draught_ratio",
+    "length_beam_ratio",
+    "froude_number"
+  ],
+  "feature_groups": {
+    "longitudinal_position_center_buoyancy": [
+      0
+    ],
+    "prismatic_coefficient": [
+      1
+    ],
+    "length_displacement_ratio": [
+      2
+    ],
+    "beam_draught_ratio": [
+      3
+    ],
+    "length_beam_ratio": [
+      4
+    ],
+    "froude_number": [
+      5
+    ]
+  },
+  "feature_group_roles": {
+    "longitudinal_position_center_buoyancy": "ordinary",
+    "prismatic_coefficient": "ordinary",
+    "length_displacement_ratio": "ordinary",
+    "beam_draught_ratio": "ordinary",
+    "length_beam_ratio": "ordinary",
+    "froude_number": "ordinary"
+  },
+  "target_name": "residuary_resistance",
+  "x_scaler_mean": [
+    -2.508372093023256,
+    0.5630325581395337,
+    4.78009302325581,
+    3.9190697674418553,
+    3.2031627906976663,
+    0.2848837209302325
+  ],
+  "x_scaler_scale": [
+    1.5040486914318782,
+    0.02357893937029427,
+    0.25606138562293834,
+    0.5629433196859289,
+    0.25127997266391844,
+    0.10097483207084862
+  ],
+  "y_scaler_mean": [
+    10.234511627906977
+  ],
+  "y_scaler_scale": [
+    15.144280173411842
+  ],
+  "split_indices": "protocol/splits/2e80feeae4ed165a4f4cd45ea07b08bd18e06ac17038328f50d3499484890db1.npz",
+  "split_sha256": "4ce70e63fcedabc5bd70835af9e8d1879e9bb964866db3350c6ec320c043bc04",
+  "partition_sizes": {
+    "train": 215,
+    "validation": 46,
+    "test": 47
+  },
+  "true_pairs": [],
+  "interaction_groups": []
+}

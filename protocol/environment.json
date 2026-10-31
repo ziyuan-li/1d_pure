@@ -1,0 +1,18 @@
+{
+  "captured_utc": "2026-10-30T13:53:56.461368+00:00",
+  "cuda_devices": [
+    "NVIDIA GeForce RTX 5080"
+  ],
+  "packages": {
+    "numpy": "1.26.4",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.17.1",
+    "shap": "not-installed",
+    "torch": "2.14.0+cu130"
+  },
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "torch_cuda_available": true,
+  "torch_cuda_version": "13.0"
+}

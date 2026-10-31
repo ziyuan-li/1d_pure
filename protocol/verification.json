@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "semantic_checks": [
+    "pure_resmlp/models/complex_mlp.py",
+    "pure_resmlp/models/complex_pure.py",
+    "pure_resmlp/models/complex_readout.py",
+    "pure_resmlp/models/context.py",
+    "pure_resmlp/models/mlp.py",
+    "pure_resmlp/models/pure.py",
+    "pure_resmlp/models/residual_mlp.py",
+    "pure_resmlp/models/__init__.py",
+    "pure_resmlp/data/datasets.py",
+    "pure_resmlp/data/synthetic.py",
+    "pure_resmlp/data/__init__.py",
+    "ModelInputs",
+    "set_seed",
+    "prepare_model_inputs",
+    "transform_input_matrix",
+    "resolve_context_ablation",
+    "build_torch_model",
+    "_real_degrees_of_freedom",
+    "_make_loader",
+    "_forward",
+    "train_torch_model",
+    "predict_torch",
+    "regression_metrics"
+  ],
+  "tables_verified": 10,
+  "checkpoints_evaluated": 1215,
+  "unique_data_preparations": 46,
+  "metric_max_absolute_errors": {
+    "test_rmse": 0,
+    "test_mae": 0,
+    "test_r2": 0,
+    "test_mse_standardized": 0
+  },
+  "source_data_in_release": false,
+  "publication_date": "2026-10-31",
+  "standalone_checkpoint_checks": 1215,
+  "reaggregated_record_files_matched": 29,
+  "tables_from_reaggregated_records_matched": 10,
+  "regenerated_figures_with_identical_rendered_pixels": 6,
+  "full_training_reproduction": {
+    "run_id": "primary/synthetic_higher_order/cv_pure/split_0/f1000/none/seed_0",
+    "epochs": 100,
+    "all_weight_tensors_exact": true,
+    "test_rmse": 0.08766601350161157
+  },
+  "noise_and_interaction_cli": "passed",
+  "synthetic_true_pair_recovery": "9 of 9 in all five sampling repetitions",
+  "latency_cli": "passed",
+  "short_training_cli": "passed",
+  "source_experiment_artifacts_unchanged": true,
+  "initialization_and_rng_equivalent_cases": 255,
+  "python_comments": 0,
+  "python_docstrings": 0,
+  "isolated_archive_unit_tests_passed": 5,
+  "isolated_archive_table_generation": "passed",
+  "source_cleanups": [
+    "Renamed legacy MLP4Layer class names to MLPRegressor / ComplexMLPRegressor.",
+    "Removed unused zero-initialization switches from PU blocks."
+  ]
+}

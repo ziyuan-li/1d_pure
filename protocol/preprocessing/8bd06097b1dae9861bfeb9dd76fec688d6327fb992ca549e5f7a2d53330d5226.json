@@ -1,0 +1,84 @@
+{
+  "feature_names": [
+    "Cement (component 1)(kg in a m^3 mixture)",
+    "Blast Furnace Slag (component 2)(kg in a m^3 mixture)",
+    "Fly Ash (component 3)(kg in a m^3 mixture)",
+    "Water  (component 4)(kg in a m^3 mixture)",
+    "Superplasticizer (component 5)(kg in a m^3 mixture)",
+    "Coarse Aggregate  (component 6)(kg in a m^3 mixture)",
+    "Fine Aggregate (component 7)(kg in a m^3 mixture)",
+    "Age (day)"
+  ],
+  "feature_groups": {
+    "Cement (component 1)(kg in a m^3 mixture)": [
+      0
+    ],
+    "Blast Furnace Slag (component 2)(kg in a m^3 mixture)": [
+      1
+    ],
+    "Fly Ash (component 3)(kg in a m^3 mixture)": [
+      2
+    ],
+    "Water  (component 4)(kg in a m^3 mixture)": [
+      3
+    ],
+    "Superplasticizer (component 5)(kg in a m^3 mixture)": [
+      4
+    ],
+    "Coarse Aggregate  (component 6)(kg in a m^3 mixture)": [
+      5
+    ],
+    "Fine Aggregate (component 7)(kg in a m^3 mixture)": [
+      6
+    ],
+    "Age (day)": [
+      7
+    ]
+  },
+  "feature_group_roles": {
+    "Cement (component 1)(kg in a m^3 mixture)": "ordinary",
+    "Blast Furnace Slag (component 2)(kg in a m^3 mixture)": "ordinary",
+    "Fly Ash (component 3)(kg in a m^3 mixture)": "ordinary",
+    "Water  (component 4)(kg in a m^3 mixture)": "ordinary",
+    "Superplasticizer (component 5)(kg in a m^3 mixture)": "ordinary",
+    "Coarse Aggregate  (component 6)(kg in a m^3 mixture)": "ordinary",
+    "Fine Aggregate (component 7)(kg in a m^3 mixture)": "ordinary",
+    "Age (day)": "ordinary"
+  },
+  "target_name": "Concrete compressive strength(MPa, megapascals)",
+  "x_scaler_mean": [
+    280.27241100323613,
+    70.50598705501613,
+    53.43181229773465,
+    181.22326860841403,
+    6.034084142394818,
+    972.235372168284,
+    779.8792233009707,
+    44.64239482200647
+  ],
+  "x_scaler_scale": [
+    103.2310879182985,
+    83.26340423734024,
+    64.16984411546377,
+    21.39019770653404,
+    5.888547758839215,
+    79.40000465428805,
+    79.60746060225215,
+    60.04908953627305
+  ],
+  "y_scaler_mean": [
+    35.576843818555346
+  ],
+  "y_scaler_scale": [
+    16.953706897500716
+  ],
+  "split_indices": "protocol/splits/8bd06097b1dae9861bfeb9dd76fec688d6327fb992ca549e5f7a2d53330d5226.npz",
+  "split_sha256": "ffb2585183d5a32025a18ddc9cb813f1b0927dd1ab8da5203f9d822ee2582b66",
+  "partition_sizes": {
+    "train": 618,
+    "validation": 206,
+    "test": 206
+  },
+  "true_pairs": [],
+  "interaction_groups": []
+}

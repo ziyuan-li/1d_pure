@@ -1,0 +1,72 @@
+{
+  "architecture": {
+    "complex_readout": "alpha*Re(o)+beta*Im(o)+b",
+    "projection_initialization": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "pure_block1": "Linear default",
+    "pure_block2": "independent Linear default",
+    "pure_output_affine": "zero"
+  },
+  "fixed_split_seed": 0,
+  "cross_split_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "synthetic_and_context_ablation_seeds": [
+    0,
+    1,
+    2
+  ],
+  "data_seed": 0,
+  "subset_seed": 0,
+  "interaction_sampling_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "context_sampling_seeds": [
+    0
+  ],
+  "corruption_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "bootstrap_seed": 0,
+  "bootstrap_resamples": 10000,
+  "noise_levels": [
+    0,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "learning_fractions": [
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "checkpoint_count": 1215,
+  "deterministic_algorithms": true,
+  "float32_matmul_precision": "highest",
+  "allow_tf32": false,
+  "source_plan_sha256": "351d8a1b73e98db4cbf5769e0e5b914a07459d9a2a4fbd285fdb0fb61b83b80a"
+}

@@ -1,0 +1,10 @@
+dataset,model,precision,recall,mean_rank,rank_sd,exact_count,repetitions
+synthetic_higher_order,cv_mlp,0.3333333333333333,0.3333333333333333,121.34814814814814,23.19721698728795,0,15
+synthetic_higher_order,cv_pure,1.0,1.0,5.0,0.0,15,15
+synthetic_higher_order,mlp,0.3333333333333333,0.3333333333333333,93.46666666666668,33.24963566123603,0,15
+synthetic_higher_order,resmlp,0.3333333333333333,0.3333333333333333,75.94074074074074,10.500849605894766,0,15
+synthetic_higher_order,rv_pure,0.3333333333333333,0.3333333333333333,93.0222222222222,30.835205148388585,0,15
+synthetic_pairwise,cv_pure,1.0,1.0,1.5,0.0,15,15
+synthetic_pairwise,mlp,1.0,1.0,1.5,0.0,15,15
+synthetic_pairwise,resmlp,1.0,1.0,1.5,0.0,15,15
+synthetic_pairwise,rv_pure,1.0,1.0,1.5,0.0,15,15

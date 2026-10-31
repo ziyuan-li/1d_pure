@@ -1,44 +1,78 @@
-# PURe
+# PURe: prediction and interaction recovery
 
-Reference implementations of RV-PURe and CV-PURe for
-*Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Networks*.
+Code and checkpoints for *Learning Nonlinear Interactions: Prediction and
+Interpretation with Product-Unit Residual Networks* (journal revision,
+31 October 2026), by Ziyuan Li, Uwe Jaekel, and Babette Dellen.
 
-Architecture code only; training pipelines, datasets, and pretrained checkpoints are not included.
-The example and tests use synthetic inputs generated in memory, with no dataset or checkpoint files read, written, or downloaded. Example predictions come from randomly initialized models and only demonstrate input/output behavior.
+This release contains the experiments used by the manuscript's **10 tables
+and 6 figures**, including 1,215 trained checkpoints. CV-PURe and CV-MLP use
+the signed readout `alpha * Re(o) + beta * Im(o) + b`. Both PURe blocks use
+independent default initialization; the final output affine layer starts at zero.
+
+See [paper–code correspondence](PAPER_CODE_MAP.md) for the methods, seeds,
+initialization, and sources for every table and figure.
 
 ## Quick start
 
-Run from this directory:
+Use Python 3.12. Install a PyTorch build appropriate for your CPU or GPU,
+then run these commands from the repository root:
 
 ```bash
 python -m pip install -r requirements.txt
-python example.py
+python -m pure_resmlp.paper demo
+python -m pure_resmlp.paper verify
 python -m unittest discover -s tests -v
 ```
 
-## Usage
+The demo loads the higher-order CV-PURe checkpoint (training seed 0), predicts
+the included synthetic test data, and checks its RMSE against the saved result.
+`verify` loads every checkpoint, checks checksums and dimensions, and runs
+generated-input forward passes. Add `--device cuda:0` to use a GPU.
 
-```python
-import torch
-from pure_models import RVPURe, CVPURe
+If checkpoints are distributed separately, extract `pure_paper_checkpoints.zip`
+at the repository root to create `checkpoints/`. Each file contains a PyTorch
+state dictionary and is loaded with `weights_only=True`.
 
-x = torch.randn(8, 10, dtype=torch.float32)
-rv_model = RVPURe(input_dim=10, hidden_dim=128)
-cv_model = CVPURe(input_dim=10, hidden_dim=64)
-rv_prediction = rv_model(x)
-cv_prediction = cv_model(x)
+## Reproduce experiments and figures
+
+```bash
+python -m pure_resmlp.paper list --dataset friedman --model cv_pure
+python -m pure_resmlp.paper train --device cuda:0
+python -m pure_resmlp.paper evaluate --noise --interactions --device cuda:0
+python -m pure_resmlp.summarize
+python -m pure_resmlp.tables
+python -m pure_resmlp.paper figures
 ```
 
-Both predictions have shape `(8, 1)`. Use width 64 for both models in the synthetic and context settings.
+`train` and `evaluate` default to the higher-order CV-PURe seed-0 run; select
+another listed configuration with `--run-id ID`. Training starts from scratch
+using the recorded settings. `--smoke-epochs 2` runs a short training check.
+Outputs go to `generated/`; released weights and records are preserved.
+Tables and figures rebuild from saved results without datasets or a GPU.
+`summarize` recomputes statistics from per-seed records; use
+`python -m pure_resmlp.tables --report-dir generated/reports` to use those summaries.
+Use `python -m pure_resmlp.paper benchmark --run-id ID --device cuda:0` for
+the synchronized full-test latency protocol.
 
-## Implementation notes
+| Contents | Location |
+|---|---|
+| Architectures, preprocessing, training, interaction scoring | `pure_resmlp/` |
+| Run configurations, seeds, scalers, exact split indices | `protocol/` |
+| Model weights | `checkpoints/` |
+| Per-seed metrics and table/figure source records | `records/` |
+| Friedman, pairwise, and higher-order synthetic data | `data/synthetic/` |
+| Six manuscript figures | `figures/` |
 
-- Both networks use two independently initialized residual blocks with the same default initialization scheme.
-- RV-PURe uses float32; CV-PURe uses complex64 with the signed readout `alpha * Re(o) + beta * Im(o) + b`. Its three real float32 parameters start at `(1, 0, 0)` and are learned jointly with the network.
-- This implements the projection used in the subsequent experiments; the retained conference results use a magnitude readout.
-- Initialization uses Kaiming-uniform (`a=sqrt(5)`), independently for real and imaginary components. Details not specified by the manuscript follow the earlier code's Linear initialization convention.
-- Dataset-specific preprocessing and target transformations are not included.
+Scientific benchmarks use split seeds **0–4**, each with training seeds **0–4**.
+Other random-split analyses use split **0**. Synthetic recovery and Bike context
+ablations use training seeds **0–2**; other experiments use **0–4**. Bike and
+Parkinsons use chronological partitions. Full settings and checkpoint provenance
+are in `protocol/`, with table/figure sources in `protocol/manuscript_index.json`.
+The recorded environment is PyTorch 2.14.0/CUDA 13.0 on an
+RTX 5080. Hardware or package changes can affect training and timing results.
 
-This is a manuscript-based reference implementation, not the original experimental source. Tests check architecture consistency, not reproduction of reported results.
+Only generated synthetic observations are included. Obtain third-party data
+from their original sources using [the data guide](data/README.md). No third-party
+sample rows, targets, or individual predictions are distributed.
 
-Licensed under the [MIT License](LICENSE).
+Code and checkpoints are provided under the [MIT License](LICENSE).

@@ -1,0 +1,84 @@
+{
+  "feature_names": [
+    "MedInc",
+    "HouseAge",
+    "AveRooms",
+    "AveBedrms",
+    "Population",
+    "AveOccup",
+    "Latitude",
+    "Longitude"
+  ],
+  "feature_groups": {
+    "MedInc": [
+      0
+    ],
+    "HouseAge": [
+      1
+    ],
+    "AveRooms": [
+      2
+    ],
+    "AveBedrms": [
+      3
+    ],
+    "Population": [
+      4
+    ],
+    "AveOccup": [
+      5
+    ],
+    "Latitude": [
+      6
+    ],
+    "Longitude": [
+      7
+    ]
+  },
+  "feature_group_roles": {
+    "MedInc": "ordinary",
+    "HouseAge": "ordinary",
+    "AveRooms": "ordinary",
+    "AveBedrms": "ordinary",
+    "Population": "ordinary",
+    "AveOccup": "ordinary",
+    "Latitude": "ordinary",
+    "Longitude": "ordinary"
+  },
+  "target_name": "MedHouseVal",
+  "x_scaler_mean": [
+    3.8762983406008065,
+    28.61906492248062,
+    5.432606834464256,
+    1.0961743863040811,
+    1425.437742248062,
+    3.030518031107435,
+    35.62478258236431,
+    -119.5630081153091
+  ],
+  "x_scaler_scale": [
+    1.9067256800343004,
+    12.60061713672805,
+    2.5233381597970106,
+    0.48951428661318924,
+    1143.0281424989107,
+    6.441144479289412,
+    2.1364872172729488,
+    2.005190582880941
+  ],
+  "y_scaler_mean": [
+    2.0724989589389535
+  ],
+  "y_scaler_scale": [
+    1.1568800717448473
+  ],
+  "split_indices": "protocol/splits/e1792ba5e4dfac786bd840c7156b4f0517c94a12ac6a9c87bcd92abddb8b73d9.npz",
+  "split_sha256": "704f2ea340a126154ef39db6f064aeda5b30afff30aa7f2c3f37093ef3a1c210",
+  "partition_sizes": {
+    "train": 16512,
+    "validation": 2064,
+    "test": 2064
+  },
+  "true_pairs": [],
+  "interaction_groups": []
+}

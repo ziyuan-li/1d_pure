@@ -1,0 +1,140 @@
+{
+  "manuscript_revision": "2026-10-31",
+  "tables": [
+    {
+      "number": 1,
+      "title": "Datasets and partitions",
+      "sources": [
+        "protocol/preprocessing/",
+        "protocol/splits/"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Cross-split predictive performance",
+      "sources": [
+        "records/random_split_robustness.csv",
+        "records/random_split_by_split.csv"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Residual-connection ablation",
+      "sources": [
+        "records/table3_summary.csv",
+        "records/table3_per_seed.csv"
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Interaction concentration, true-pair share and stability",
+      "sources": [
+        "records/scientific_interactions/summary.csv",
+        "records/pairs_raw.csv"
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Synthetic prediction and interaction recovery",
+      "sources": [
+        "records/primary_summary.csv",
+        "records/synthetic_recovery_summary.csv",
+        "records/recovery_raw.csv"
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Bike Sharing context prediction",
+      "sources": [
+        "records/primary_summary.csv"
+      ]
+    },
+    {
+      "number": 7,
+      "title": "RV-PURe and CV-PURe Bike context ablations",
+      "sources": [
+        "records/table7_summary.csv",
+        "records/table7_full_context.csv",
+        "records/table7_per_seed.csv"
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Feature-noise AUC",
+      "sources": [
+        "records/noise_suite_auc.csv",
+        "records/noise_raw.csv"
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Learning-curve AULC",
+      "sources": [
+        "records/learning_aulc_summary.csv",
+        "records/learning_aulc_per_seed.csv"
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Parameter counts and inference latency",
+      "sources": [
+        "protocol/runs.json",
+        "records/latency_summary.csv",
+        "records/latency_per_seed.csv"
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "number": 1,
+      "title": "Real-valued PU residual block",
+      "file": "figures/pure_real_block_vertical.pdf",
+      "sources": [
+        "pure_resmlp/models/pure.py"
+      ]
+    },
+    {
+      "number": 2,
+      "title": "RV-PURe and CV-PURe architectures",
+      "file": "figures/pure_network_architectures_vertical.pdf",
+      "sources": [
+        "pure_resmlp/models/pure.py",
+        "pure_resmlp/models/complex_pure.py"
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Scientific interaction maps",
+      "file": "figures/figure_scientific_interactions.pdf",
+      "sources": [
+        "records/scientific_interactions/mean_maps.csv"
+      ]
+    },
+    {
+      "number": 4,
+      "title": "Context interaction maps",
+      "file": "figures/figure2_context_interactions.pdf",
+      "sources": [
+        "records/context_interactions.csv"
+      ]
+    },
+    {
+      "number": 5,
+      "title": "Feature-noise curves",
+      "file": "figures/figure3_noise_robustness.pdf",
+      "sources": [
+        "records/noise_summary.csv"
+      ]
+    },
+    {
+      "number": 6,
+      "title": "Sample-efficiency curves",
+      "file": "figures/figure4_sample_efficiency.pdf",
+      "sources": [
+        "records/learning_curves.csv"
+      ]
+    }
+  ],
+  "checkpoints": "protocol/runs.json",
+  "run_id_note": "window_2 is the final chronological 60/20/20 partition; it is not an extra temporal-robustness experiment."
+}

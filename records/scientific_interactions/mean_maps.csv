@@ -1,0 +1,506 @@
+dataset,model,i,j,feature_i,feature_j,strength_mean,strength_std,rank
+california,cv_mlp,0,1,MedInc,HouseAge,0.1518879124522208,0.0262319818695974,11
+california,cv_mlp,0,2,MedInc,AveRooms,0.1660226094722747,0.0282088070900765,10
+california,cv_mlp,0,3,MedInc,AveBedrms,0.0735707160830497,0.0219969477005021,24
+california,cv_mlp,0,4,MedInc,Population,0.109774856865406,0.0206783357622445,18
+california,cv_mlp,0,5,MedInc,AveOccup,0.1440742424130439,0.0198908362830389,12
+california,cv_mlp,0,6,MedInc,Latitude,0.2368007296323775,0.0343638056484949,3
+california,cv_mlp,0,7,MedInc,Longitude,0.2428687280416488,0.033645808756984,2
+california,cv_mlp,1,2,HouseAge,AveRooms,0.1356780144572257,0.0386803361008307,14
+california,cv_mlp,1,3,HouseAge,AveBedrms,0.0666192667931317,0.018489367022879,26
+california,cv_mlp,1,4,HouseAge,Population,0.100127719938755,0.0200285979895605,20
+california,cv_mlp,1,5,HouseAge,AveOccup,0.1371124029159545,0.020742606677537,13
+california,cv_mlp,1,6,HouseAge,Latitude,0.1883351737260818,0.0388745995017495,5
+california,cv_mlp,1,7,HouseAge,Longitude,0.1832319834828376,0.0401907320386412,6
+california,cv_mlp,2,3,AveRooms,AveBedrms,0.115534456372261,0.0315980231360673,17
+california,cv_mlp,2,4,AveRooms,Population,0.1000506278872489,0.0211301106712246,21
+california,cv_mlp,2,5,AveRooms,AveOccup,0.1030711270868777,0.0367858256661713,19
+california,cv_mlp,2,6,AveRooms,Latitude,0.1822333681583404,0.0374344712798687,7
+california,cv_mlp,2,7,AveRooms,Longitude,0.1701390358805656,0.0403138400812809,9
+california,cv_mlp,3,4,AveBedrms,Population,0.0475762018561362,0.0125977983702028,28
+california,cv_mlp,3,5,AveBedrms,AveOccup,0.0532532158493995,0.0122220008723362,27
+california,cv_mlp,3,6,AveBedrms,Latitude,0.0958324223756789,0.0297789403262037,22
+california,cv_mlp,3,7,AveBedrms,Longitude,0.0864677993953227,0.0242040358512852,23
+california,cv_mlp,4,5,Population,AveOccup,0.0729645945131778,0.0193071119027246,25
+california,cv_mlp,4,6,Population,Latitude,0.1238834264874458,0.0256197381855014,15
+california,cv_mlp,4,7,Population,Longitude,0.1212952432036399,0.0297820629372852,16
+california,cv_mlp,5,6,AveOccup,Latitude,0.190860297679901,0.0075450287761854,4
+california,cv_mlp,5,7,AveOccup,Longitude,0.175774181485176,0.0208149431720074,8
+california,cv_mlp,6,7,Latitude,Longitude,0.543488768339157,0.0478145124878971,1
+california,cv_pure,0,1,MedInc,HouseAge,0.1200967949628829,0.0145065433592027,13
+california,cv_pure,0,2,MedInc,AveRooms,0.1341441065073013,0.0096635566478366,11
+california,cv_pure,0,3,MedInc,AveBedrms,0.0570942957699298,0.0063539392992671,25
+california,cv_pure,0,4,MedInc,Population,0.0823831418156623,0.0093160469544573,21
+california,cv_pure,0,5,MedInc,AveOccup,0.1304761791229247,0.0068287770084173,12
+california,cv_pure,0,6,MedInc,Latitude,0.2222514140605926,0.0377339483429064,2
+california,cv_pure,0,7,MedInc,Longitude,0.217935140132904,0.0363024645729799,4
+california,cv_pure,1,2,HouseAge,AveRooms,0.1071250247955321,0.0155703922857144,17
+california,cv_pure,1,3,HouseAge,AveBedrms,0.0495652206242084,0.0083469900875865,27
+california,cv_pure,1,4,HouseAge,Population,0.0785183827579021,0.0121790199749805,22
+california,cv_pure,1,5,HouseAge,AveOccup,0.136299240887165,0.0098170047731233,10
+california,cv_pure,1,6,HouseAge,Latitude,0.179513862133026,0.0191669655432789,7
+california,cv_pure,1,7,HouseAge,Longitude,0.1747282469272613,0.030262245279938,8
+california,cv_pure,2,3,AveRooms,AveBedrms,0.108507098853588,0.014196067102509,15
+california,cv_pure,2,4,AveRooms,Population,0.0783749696612357,0.0048919980893008,23
+california,cv_pure,2,5,AveRooms,AveOccup,0.0948742699623107,0.015583707745353,19
+california,cv_pure,2,6,AveRooms,Latitude,0.1799547231197356,0.0359723188263941,6
+california,cv_pure,2,7,AveRooms,Longitude,0.1668776822090148,0.0421230333732805,9
+california,cv_pure,3,4,AveBedrms,Population,0.0371910175681113,0.0052843591572523,28
+california,cv_pure,3,5,AveBedrms,AveOccup,0.0542449566721915,0.0073897985136627,26
+california,cv_pure,3,6,AveBedrms,Latitude,0.1059783181548118,0.0121155612965581,18
+california,cv_pure,3,7,AveBedrms,Longitude,0.0907317414879798,0.0109460220713185,20
+california,cv_pure,4,5,Population,AveOccup,0.0644043135643005,0.0083304638627131,24
+california,cv_pure,4,6,Population,Latitude,0.1184172546863555,0.0332698117237448,14
+california,cv_pure,4,7,Population,Longitude,0.1071481847763061,0.0265457216538062,16
+california,cv_pure,5,6,AveOccup,Latitude,0.2207787603139877,0.0204524009349638,3
+california,cv_pure,5,7,AveOccup,Longitude,0.2080591124296188,0.0288251368609129,5
+california,cv_pure,6,7,Latitude,Longitude,0.7080566370487213,0.143841154847895,1
+california,mlp,0,1,MedInc,HouseAge,0.1697884953022002,0.029312705384762,11
+california,mlp,0,2,MedInc,AveRooms,0.1823247063159942,0.0382692571074808,10
+california,mlp,0,3,MedInc,AveBedrms,0.0771905362606048,0.0218620079126331,25
+california,mlp,0,4,MedInc,Population,0.1088285115361213,0.0200940010288148,18
+california,mlp,0,5,MedInc,AveOccup,0.1491467079520225,0.0195575217151327,12
+california,mlp,0,6,MedInc,Latitude,0.2436391180753707,0.0401461397907655,3
+california,mlp,0,7,MedInc,Longitude,0.2534179019927978,0.0351140155104386,2
+california,mlp,1,2,HouseAge,AveRooms,0.1452493351697921,0.0402707357139958,13
+california,mlp,1,3,HouseAge,AveBedrms,0.0677328693866729,0.0187920898513802,26
+california,mlp,1,4,HouseAge,Population,0.1054728645086288,0.0254923831915964,19
+california,mlp,1,5,HouseAge,AveOccup,0.1365102145075797,0.0188940636963596,14
+california,mlp,1,6,HouseAge,Latitude,0.1957697844505309,0.0358310132566515,5
+california,mlp,1,7,HouseAge,Longitude,0.2035084122419356,0.0446575719741389,4
+california,mlp,2,3,AveRooms,AveBedrms,0.1157715684175491,0.025920934702938,17
+california,mlp,2,4,AveRooms,Population,0.1010841184854507,0.0248735088769934,21
+california,mlp,2,5,AveRooms,AveOccup,0.1048113992810249,0.0301697177660961,20
+california,mlp,2,6,AveRooms,Latitude,0.1954694366455077,0.0522865968077045,6
+california,mlp,2,7,AveRooms,Longitude,0.1874376213550567,0.0489429099314135,9
+california,mlp,3,4,AveBedrms,Population,0.0515347605198621,0.014768337514158,28
+california,mlp,3,5,AveBedrms,AveOccup,0.0553562922775744,0.0136723437824887,27
+california,mlp,3,6,AveBedrms,Latitude,0.0941391225159167,0.0289189441719191,23
+california,mlp,3,7,AveBedrms,Longitude,0.0950264792144298,0.0293344269757652,22
+california,mlp,4,5,Population,AveOccup,0.079739764034748,0.0226709129383877,24
+california,mlp,4,6,Population,Latitude,0.1328298991918563,0.0376613443587416,15
+california,mlp,4,7,Population,Longitude,0.1321955394744872,0.0349127016141334,16
+california,mlp,5,6,AveOccup,Latitude,0.19211519241333,0.0322311858498482,7
+california,mlp,5,7,AveOccup,Longitude,0.1879519283771514,0.0355501600099435,8
+california,mlp,6,7,Latitude,Longitude,0.5508915376663208,0.1039839232686059,1
+california,resmlp,0,1,MedInc,HouseAge,0.1595072430372238,0.0169574406978934,11
+california,resmlp,0,2,MedInc,AveRooms,0.1796454361081123,0.028925871442508,10
+california,resmlp,0,3,MedInc,AveBedrms,0.0798604868352412,0.0228825588980555,24
+california,resmlp,0,4,MedInc,Population,0.1090297001600265,0.0154983709938903,19
+california,resmlp,0,5,MedInc,AveOccup,0.1386663314700126,0.0170150050728661,13
+california,resmlp,0,6,MedInc,Latitude,0.2481676524877548,0.0347648468854798,2
+california,resmlp,0,7,MedInc,Longitude,0.2475114524364471,0.0296439620298841,3
+california,resmlp,1,2,HouseAge,AveRooms,0.1457037860155105,0.0326696209691463,12
+california,resmlp,1,3,HouseAge,AveBedrms,0.0679419048130511,0.01722353428482,26
+california,resmlp,1,4,HouseAge,Population,0.1023062601685523,0.0150312244285591,20
+california,resmlp,1,5,HouseAge,AveOccup,0.135600094795227,0.0140437096217898,14
+california,resmlp,1,6,HouseAge,Latitude,0.1937284457683563,0.0351163311216595,5
+california,resmlp,1,7,HouseAge,Longitude,0.1890545403957366,0.0332601017875022,6
+california,resmlp,2,3,AveRooms,AveBedrms,0.1354303792119025,0.0421436000217052,15
+california,resmlp,2,4,AveRooms,Population,0.1019790428876876,0.018876733443365,21
+california,resmlp,2,5,AveRooms,AveOccup,0.1092363989353179,0.0239233930861047,18
+california,resmlp,2,6,AveRooms,Latitude,0.1991160291433334,0.0360254365227729,4
+california,resmlp,2,7,AveRooms,Longitude,0.1886865895986556,0.039563353132838,7
+california,resmlp,3,4,AveBedrms,Population,0.0527205342054366,0.011579073555759,28
+california,resmlp,3,5,AveBedrms,AveOccup,0.0532714538276195,0.0142650114815584,27
+california,resmlp,3,6,AveBedrms,Latitude,0.0980685994029044,0.0238506421247343,22
+california,resmlp,3,7,AveBedrms,Longitude,0.092827803492546,0.0253533086578488,23
+california,resmlp,4,5,Population,AveOccup,0.0751156871020793,0.013921524430813,25
+california,resmlp,4,6,Population,Latitude,0.1298236343264579,0.0268408021671493,16
+california,resmlp,4,7,Population,Longitude,0.1246155709028243,0.0282471861444024,17
+california,resmlp,5,6,AveOccup,Latitude,0.1841879969835281,0.0165629866532953,8
+california,resmlp,5,7,AveOccup,Longitude,0.1823197895288467,0.0263223768080258,9
+california,resmlp,6,7,Latitude,Longitude,0.6144561660289765,0.1188681776461744,1
+california,rv_pure,0,1,MedInc,HouseAge,0.1357643511891364,0.0140229578988637,12
+california,rv_pure,0,2,MedInc,AveRooms,0.1558976739645004,0.024464674348068,9
+california,rv_pure,0,3,MedInc,AveBedrms,0.0620507019758224,0.0148232290443039,25
+california,rv_pure,0,4,MedInc,Population,0.0986460331082343,0.0100454553805805,18
+california,rv_pure,0,5,MedInc,AveOccup,0.135512149631977,0.0117821377397003,13
+california,rv_pure,0,6,MedInc,Latitude,0.2220913648605346,0.0139076570893168,2
+california,rv_pure,0,7,MedInc,Longitude,0.2210476672649383,0.0077979677379743,3
+california,rv_pure,1,2,HouseAge,AveRooms,0.1091185629367827,0.024682915371334,14
+california,rv_pure,1,3,HouseAge,AveBedrms,0.05546604976058,0.0132140591384989,26
+california,rv_pure,1,4,HouseAge,Population,0.089600626528263,0.0109777287568062,19
+california,rv_pure,1,5,HouseAge,AveOccup,0.1365476790070533,0.0135552084734874,11
+california,rv_pure,1,6,HouseAge,Latitude,0.1822676992416381,0.0309918191830272,5
+california,rv_pure,1,7,HouseAge,Longitude,0.1761363732814788,0.0268730824928062,7
+california,rv_pure,2,3,AveRooms,AveBedrms,0.1037638479471206,0.020356307288671,16
+california,rv_pure,2,4,AveRooms,Population,0.0862792718410491,0.0129256583208443,20
+california,rv_pure,2,5,AveRooms,AveOccup,0.0833642727136611,0.0168672216305622,22
+california,rv_pure,2,6,AveRooms,Latitude,0.1678246873617171,0.0171411423030144,8
+california,rv_pure,2,7,AveRooms,Longitude,0.1485931718349456,0.0208748598703686,10
+california,rv_pure,3,4,AveBedrms,Population,0.0437459488213061,0.008808373620528,28
+california,rv_pure,3,5,AveBedrms,AveOccup,0.0465413726866244,0.0092870025870031,27
+california,rv_pure,3,6,AveBedrms,Latitude,0.0856643095612525,0.0176479838646015,21
+california,rv_pure,3,7,AveBedrms,Longitude,0.0780610206723212,0.0172803199748581,23
+california,rv_pure,4,5,Population,AveOccup,0.0656752295792102,0.0105509290225737,24
+california,rv_pure,4,6,Population,Latitude,0.1051564526557921,0.0159545048424501,15
+california,rv_pure,4,7,Population,Longitude,0.1007357823848724,0.0148123429891558,17
+california,rv_pure,5,6,AveOccup,Latitude,0.197092638015747,0.0061554028968829,4
+california,rv_pure,5,7,AveOccup,Longitude,0.1778278917074203,0.0125386755741223,6
+california,rv_pure,6,7,Latitude,Longitude,0.5774172604084015,0.0823401695545674,1
+concrete,cv_mlp,0,1,Cement (component 1)(kg in a m^3 mixture),Blast Furnace Slag (component 2)(kg in a m^3 mixture),0.1488199245929717,0.0058016023009185,10
+concrete,cv_mlp,0,2,Cement (component 1)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1616066661477088,0.0220547371796026,6
+concrete,cv_mlp,0,3,Cement (component 1)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1985453790426254,0.0266207917393511,1
+concrete,cv_mlp,0,4,Cement (component 1)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1401061350107192,0.0113885964616018,13
+concrete,cv_mlp,0,5,Cement (component 1)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1425047576427459,0.0109359299595683,12
+concrete,cv_mlp,0,6,Cement (component 1)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1517966130375861,0.017430524464411,7
+concrete,cv_mlp,0,7,Cement (component 1)(kg in a m^3 mixture),Age (day),0.174031793475151,0.0140246814790773,4
+concrete,cv_mlp,1,2,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1260885965824126,0.0206658804415718,25
+concrete,cv_mlp,1,3,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1316585302352904,0.0171517222744248,20
+concrete,cv_mlp,1,4,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1382705107331275,0.0222794083304159,16
+concrete,cv_mlp,1,5,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1304131180047988,0.0157479502857788,22
+concrete,cv_mlp,1,6,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1496040758490562,0.027138932043664,8
+concrete,cv_mlp,1,7,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Age (day),0.1392964047193526,0.0127986312116469,14
+concrete,cv_mlp,2,3,Fly Ash (component 3)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1304931387305259,0.0179685211871022,21
+concrete,cv_mlp,2,4,Fly Ash (component 3)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1111993569135665,0.0028855645419144,27
+concrete,cv_mlp,2,5,Fly Ash (component 3)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1362126860022544,0.0150639676278906,17
+concrete,cv_mlp,2,6,Fly Ash (component 3)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1249513426423072,0.0117237689240484,26
+concrete,cv_mlp,2,7,Fly Ash (component 3)(kg in a m^3 mixture),Age (day),0.1072457027435302,0.0148859410534543,28
+concrete,cv_mlp,3,4,Water  (component 4)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1661589324474334,0.0127973657913608,5
+concrete,cv_mlp,3,5,Water  (component 4)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1769172292947768,0.0213320854994799,3
+concrete,cv_mlp,3,6,Water  (component 4)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1889445209503173,0.0198963438571451,2
+concrete,cv_mlp,3,7,Water  (component 4)(kg in a m^3 mixture),Age (day),0.1450588223338126,0.0189835674634422,11
+concrete,cv_mlp,4,5,Superplasticizer (component 5)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.128374256491661,0.004779681585762,23
+concrete,cv_mlp,4,6,Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1361528065800666,0.0087673736857671,18
+concrete,cv_mlp,4,7,Superplasticizer (component 5)(kg in a m^3 mixture),Age (day),0.1322980946302413,0.0172680457980559,19
+concrete,cv_mlp,5,6,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1490214782953262,0.0124923628457605,9
+concrete,cv_mlp,5,7,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Age (day),0.1281586426496505,0.0160114418057722,24
+concrete,cv_mlp,6,7,Fine Aggregate (component 7)(kg in a m^3 mixture),Age (day),0.1390215703845023,0.0059125125293453,15
+concrete,cv_pure,0,1,Cement (component 1)(kg in a m^3 mixture),Blast Furnace Slag (component 2)(kg in a m^3 mixture),0.1006324103474616,0.0075349313980545,18
+concrete,cv_pure,0,2,Cement (component 1)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1058698514103888,0.0215178811022542,14
+concrete,cv_pure,0,3,Cement (component 1)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1427774822711944,0.0161996700185531,4
+concrete,cv_pure,0,4,Cement (component 1)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1088288429379462,0.0086956690025078,12
+concrete,cv_pure,0,5,Cement (component 1)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1046316063404082,0.0083036838156172,16
+concrete,cv_pure,0,6,Cement (component 1)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1056190899014472,0.0041902333844716,15
+concrete,cv_pure,0,7,Cement (component 1)(kg in a m^3 mixture),Age (day),0.1656208902597427,0.0111912936582513,1
+concrete,cv_pure,1,2,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.0906219315528869,0.0112025424801618,22
+concrete,cv_pure,1,3,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.0836791983246802,0.007428912467507,27
+concrete,cv_pure,1,4,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1132166609168052,0.013357683395059,9
+concrete,cv_pure,1,5,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.0851188617944717,0.0121192637989967,26
+concrete,cv_pure,1,6,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1080194211006164,0.0073242461260136,13
+concrete,cv_pure,1,7,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Age (day),0.1131113246083259,0.0097039454646111,10
+concrete,cv_pure,2,3,Fly Ash (component 3)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.098939669728279,0.0139747041014253,19
+concrete,cv_pure,2,4,Fly Ash (component 3)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.0723670154809951,0.0089423686057603,28
+concrete,cv_pure,2,5,Fly Ash (component 3)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.0856266717612743,0.0116668162806683,25
+concrete,cv_pure,2,6,Fly Ash (component 3)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.0859432971477508,0.0082561884299035,24
+concrete,cv_pure,2,7,Fly Ash (component 3)(kg in a m^3 mixture),Age (day),0.0868193238973617,0.0139724498352339,23
+concrete,cv_pure,3,4,Water  (component 4)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1123501306772231,0.0116874901760413,11
+concrete,cv_pure,3,5,Water  (component 4)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1546237254142761,0.0226994018863361,2
+concrete,cv_pure,3,6,Water  (component 4)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1434053993225097,0.0251387382612036,3
+concrete,cv_pure,3,7,Water  (component 4)(kg in a m^3 mixture),Age (day),0.1311792176961898,0.0168672704886902,6
+concrete,cv_pure,4,5,Superplasticizer (component 5)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.0985169377923011,0.0139057536575218,20
+concrete,cv_pure,4,6,Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.0929661110043525,0.0094204755732838,21
+concrete,cv_pure,4,7,Superplasticizer (component 5)(kg in a m^3 mixture),Age (day),0.1213763180375098,0.0065267945243712,7
+concrete,cv_pure,5,6,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1017154201865195,0.0100323644168055,17
+concrete,cv_pure,5,7,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Age (day),0.1152147865295409,0.0129077178212062,8
+concrete,cv_pure,6,7,Fine Aggregate (component 7)(kg in a m^3 mixture),Age (day),0.1368440639972686,0.0113715509119913,5
+concrete,mlp,0,1,Cement (component 1)(kg in a m^3 mixture),Blast Furnace Slag (component 2)(kg in a m^3 mixture),0.1533883082866668,0.0208110072873744,10
+concrete,mlp,0,2,Cement (component 1)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1828197419643401,0.0319340966077618,5
+concrete,mlp,0,3,Cement (component 1)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.2013075441122054,0.0073552190501077,2
+concrete,mlp,0,4,Cement (component 1)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.160292009115219,0.0271322040266342,7
+concrete,mlp,0,5,Cement (component 1)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1584778583049773,0.0037670429641272,8
+concrete,mlp,0,6,Cement (component 1)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1577613759040832,0.0298175711028901,9
+concrete,mlp,0,7,Cement (component 1)(kg in a m^3 mixture),Age (day),0.1887076359987258,0.0153592088347667,4
+concrete,mlp,1,2,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1205081903934478,0.0108911493736508,25
+concrete,mlp,1,3,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1294933357834815,0.0155987851766893,24
+concrete,mlp,1,4,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.150421857535839,0.0335380301309137,13
+concrete,mlp,1,5,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1326141741871833,0.0188929625868988,21
+concrete,mlp,1,6,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1518650063872337,0.0172853557309718,11
+concrete,mlp,1,7,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Age (day),0.1510492652654647,0.01946065834211,12
+concrete,mlp,2,3,Fly Ash (component 3)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1295816484093665,0.0086269659226421,23
+concrete,mlp,2,4,Fly Ash (component 3)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1158960083127021,0.020538099191492,26
+concrete,mlp,2,5,Fly Ash (component 3)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1353082033991813,0.015374061569505,20
+concrete,mlp,2,6,Fly Ash (component 3)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1080303868651389,0.0093065457889692,28
+concrete,mlp,2,7,Fly Ash (component 3)(kg in a m^3 mixture),Age (day),0.11240670889616,0.0081772224783396,27
+concrete,mlp,3,4,Water  (component 4)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1616649058461188,0.0269638039139348,6
+concrete,mlp,3,5,Water  (component 4)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.208159287571907,0.0416434739174965,1
+concrete,mlp,3,6,Water  (component 4)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1957054007053374,0.0251862288620832,3
+concrete,mlp,3,7,Water  (component 4)(kg in a m^3 mixture),Age (day),0.1439562544226646,0.0096881165905862,16
+concrete,mlp,4,5,Superplasticizer (component 5)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1305120727419852,0.0173231308102849,22
+concrete,mlp,4,6,Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1385364916920661,0.0147605501100645,19
+concrete,mlp,4,7,Superplasticizer (component 5)(kg in a m^3 mixture),Age (day),0.1409466916322707,0.009618833772421,18
+concrete,mlp,5,6,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.149472657740116,0.0185165593364933,14
+concrete,mlp,5,7,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Age (day),0.1435183426737785,0.0184699777749862,17
+concrete,mlp,6,7,Fine Aggregate (component 7)(kg in a m^3 mixture),Age (day),0.1441489219665526,0.0142535770877688,15
+concrete,resmlp,0,1,Cement (component 1)(kg in a m^3 mixture),Blast Furnace Slag (component 2)(kg in a m^3 mixture),0.1353023490309714,0.0155332525396332,17
+concrete,resmlp,0,2,Cement (component 1)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1626899468898772,0.0212239949949992,6
+concrete,resmlp,0,3,Cement (component 1)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1880439168214797,0.024376256859428,3
+concrete,resmlp,0,4,Cement (component 1)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1541951057314872,0.0270420013769993,8
+concrete,resmlp,0,5,Cement (component 1)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1667690563201904,0.021620646886646,4
+concrete,resmlp,0,6,Cement (component 1)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1417587292194366,0.0133315145017647,13
+concrete,resmlp,0,7,Cement (component 1)(kg in a m^3 mixture),Age (day),0.1661534541845321,0.0117265708589261,5
+concrete,resmlp,1,2,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1244351291656493,0.0058844465800678,23
+concrete,resmlp,1,3,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1240197813510894,0.0073233756942522,24
+concrete,resmlp,1,4,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1505433836579322,0.0294384412234719,10
+concrete,resmlp,1,5,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1445063641667365,0.0251422888361949,12
+concrete,resmlp,1,6,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1448676952719688,0.016877055906356,11
+concrete,resmlp,1,7,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Age (day),0.1341664284467696,0.0121569835597964,18
+concrete,resmlp,2,3,Fly Ash (component 3)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1232420629262923,0.0118600798860174,25
+concrete,resmlp,2,4,Fly Ash (component 3)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1079252815246581,0.0051397761808633,27
+concrete,resmlp,2,5,Fly Ash (component 3)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1290189373493194,0.0188213202979898,21
+concrete,resmlp,2,6,Fly Ash (component 3)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1139906707406043,0.0144412072472727,26
+concrete,resmlp,2,7,Fly Ash (component 3)(kg in a m^3 mixture),Age (day),0.1032795983552932,0.0094716828430116,28
+concrete,resmlp,3,4,Water  (component 4)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1509234392642974,0.016490881778451,9
+concrete,resmlp,3,5,Water  (component 4)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.2157483875751495,0.0392483948405285,1
+concrete,resmlp,3,6,Water  (component 4)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1914035552740096,0.0163896679751644,2
+concrete,resmlp,3,7,Water  (component 4)(kg in a m^3 mixture),Age (day),0.1268810719251632,0.0154660538578041,22
+concrete,resmlp,4,5,Superplasticizer (component 5)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1299033737182617,0.0129067172702002,20
+concrete,resmlp,4,6,Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.131070173382759,0.0119080128531085,19
+concrete,resmlp,4,7,Superplasticizer (component 5)(kg in a m^3 mixture),Age (day),0.1385168692469596,0.0053508491297271,14
+concrete,resmlp,5,6,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1568264573812484,0.017268361991799,7
+concrete,resmlp,5,7,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Age (day),0.1366060963273048,0.0187972854797642,16
+concrete,resmlp,6,7,Fine Aggregate (component 7)(kg in a m^3 mixture),Age (day),0.1374083760380744,0.0090503795089113,15
+concrete,rv_pure,0,1,Cement (component 1)(kg in a m^3 mixture),Blast Furnace Slag (component 2)(kg in a m^3 mixture),0.1324857920408248,0.0339498522189942,16
+concrete,rv_pure,0,2,Cement (component 1)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.1604761186242103,0.0393883148616274,5
+concrete,rv_pure,0,3,Cement (component 1)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1909398800134658,0.0195639788637105,3
+concrete,rv_pure,0,4,Cement (component 1)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.156379405260086,0.0255363662454231,6
+concrete,rv_pure,0,5,Cement (component 1)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1481191325187683,0.0130380686546463,9
+concrete,rv_pure,0,6,Cement (component 1)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1513731017708778,0.0447298508353587,7
+concrete,rv_pure,0,7,Cement (component 1)(kg in a m^3 mixture),Age (day),0.1637519526481628,0.0154821541516784,4
+concrete,rv_pure,1,2,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fly Ash (component 3)(kg in a m^3 mixture),0.0971206739544868,0.0081680126342803,28
+concrete,rv_pure,1,3,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.116108292043209,0.0097786960896542,24
+concrete,rv_pure,1,4,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1442773637175559,0.0360341107021182,11
+concrete,rv_pure,1,5,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1297468701004981,0.0190500371124148,19
+concrete,rv_pure,1,6,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.138532933294773,0.0209349943902179,13
+concrete,rv_pure,1,7,Blast Furnace Slag (component 2)(kg in a m^3 mixture),Age (day),0.1286618998646735,0.01043908170813,21
+concrete,rv_pure,2,3,Fly Ash (component 3)(kg in a m^3 mixture),Water  (component 4)(kg in a m^3 mixture),0.1248500782251357,0.0150127867160517,23
+concrete,rv_pure,2,4,Fly Ash (component 3)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1050355541706084,0.0153061924252067,25
+concrete,rv_pure,2,5,Fly Ash (component 3)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1347222179174422,0.0213048355407588,15
+concrete,rv_pure,2,6,Fly Ash (component 3)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1012533295154571,0.0104962882237862,26
+concrete,rv_pure,2,7,Fly Ash (component 3)(kg in a m^3 mixture),Age (day),0.0981308525800704,0.0137722172130423,27
+concrete,rv_pure,3,4,Water  (component 4)(kg in a m^3 mixture),Superplasticizer (component 5)(kg in a m^3 mixture),0.1468940892815589,0.0219471554097874,10
+concrete,rv_pure,3,5,Water  (component 4)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.2110820114612579,0.0354925163131123,1
+concrete,rv_pure,3,6,Water  (component 4)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1996083682775497,0.024255249385876,2
+concrete,rv_pure,3,7,Water  (component 4)(kg in a m^3 mixture),Age (day),0.1279005435109138,0.017616912443644,22
+concrete,rv_pure,4,5,Superplasticizer (component 5)(kg in a m^3 mixture),Coarse Aggregate  (component 6)(kg in a m^3 mixture),0.1295542311668395,0.0107715068630702,20
+concrete,rv_pure,4,6,Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1298124393820762,0.0116719175016063,18
+concrete,rv_pure,4,7,Superplasticizer (component 5)(kg in a m^3 mixture),Age (day),0.1424735355377197,0.0109518068358712,12
+concrete,rv_pure,5,6,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture),0.1507896873354911,0.0135429380305312,8
+concrete,rv_pure,5,7,Coarse Aggregate  (component 6)(kg in a m^3 mixture),Age (day),0.1318620324134826,0.0198182762157833,17
+concrete,rv_pure,6,7,Fine Aggregate (component 7)(kg in a m^3 mixture),Age (day),0.1358452659845352,0.0088518627145278,14
+friedman,cv_mlp,0,1,x0,x1,0.3628199362754821,0.0025902228606284,1
+friedman,cv_mlp,0,2,x0,x2,0.0317123420536517,0.0007999968944127,2
+friedman,cv_mlp,0,3,x0,x3,0.0294200321286916,0.0008005343429171,5
+friedman,cv_mlp,0,4,x0,x4,0.02458698682487,0.0011404685822058,9
+friedman,cv_mlp,0,5,x0,x5,0.0228277285397052,0.0017638933412977,17
+friedman,cv_mlp,0,6,x0,x6,0.0230743519216775,0.0010703387768433,14
+friedman,cv_mlp,0,7,x0,x7,0.0233548226207494,0.0012294071667556,13
+friedman,cv_mlp,0,8,x0,x8,0.022975891008973,0.0013171980218565,15
+friedman,cv_mlp,0,9,x0,x9,0.0223655715584754,0.001731230532298,22
+friedman,cv_mlp,1,2,x1,x2,0.0312140222638844,0.000988373467347,3
+friedman,cv_mlp,1,3,x1,x3,0.0295661064237355,0.0008571623786519,4
+friedman,cv_mlp,1,4,x1,x4,0.0252469387650489,0.0017110526143881,7
+friedman,cv_mlp,1,5,x1,x5,0.0229213511198758,0.0012097926931542,16
+friedman,cv_mlp,1,6,x1,x6,0.0235785549134015,0.0012119498041503,11
+friedman,cv_mlp,1,7,x1,x7,0.0235587054491042,0.000828383924811,12
+friedman,cv_mlp,1,8,x1,x8,0.022569623440504,0.0010752425615842,20
+friedman,cv_mlp,1,9,x1,x9,0.0221602817624806,0.0016494908429024,24
+friedman,cv_mlp,2,3,x2,x3,0.0285246814042329,0.0010236514987279,6
+friedman,cv_mlp,2,4,x2,x4,0.0250653184950351,0.0016483976702726,8
+friedman,cv_mlp,2,5,x2,x5,0.0225544580072164,0.0014034930646088,21
+friedman,cv_mlp,2,6,x2,x6,0.0226903903484344,0.0013050820116048,19
+friedman,cv_mlp,2,7,x2,x7,0.0227704166620969,0.000884299482695,18
+friedman,cv_mlp,2,8,x2,x8,0.0222803656756877,0.0010629961456109,23
+friedman,cv_mlp,2,9,x2,x9,0.0214565602689981,0.0011287356893103,26
+friedman,cv_mlp,3,4,x3,x4,0.0236524017900227,0.0008563043816401,10
+friedman,cv_mlp,3,5,x3,x5,0.0210604663938283,0.0014485028645321,28
+friedman,cv_mlp,3,6,x3,x6,0.0214902205765246,0.0012365466559262,25
+friedman,cv_mlp,3,7,x3,x7,0.0212504654377698,0.000861764008699,27
+friedman,cv_mlp,3,8,x3,x8,0.0200100887566804,0.0006068470087986,30
+friedman,cv_mlp,3,9,x3,x9,0.0203289363533257,0.0010156169337288,29
+friedman,cv_mlp,4,5,x4,x5,0.0186363376677035,0.0013199444970544,32
+friedman,cv_mlp,4,6,x4,x6,0.0189617224782705,0.0006901956248202,31
+friedman,cv_mlp,4,7,x4,x7,0.0184522292762994,0.0013241647135599,33
+friedman,cv_mlp,4,8,x4,x8,0.0177571895346044,0.0012880504524663,36
+friedman,cv_mlp,4,9,x4,x9,0.0177145703881978,0.0005431238265328,37
+friedman,cv_mlp,5,6,x5,x6,0.0174036754295229,0.0011491847811004,38
+friedman,cv_mlp,5,7,x5,x7,0.0178004175797104,0.0010364227854359,35
+friedman,cv_mlp,5,8,x5,x8,0.0169526955485343,0.0008694191144396,41
+friedman,cv_mlp,5,9,x5,x9,0.0171117437630891,0.0016948027335004,40
+friedman,cv_mlp,6,7,x6,x7,0.0173899531736969,0.0008001010943034,39
+friedman,cv_mlp,6,8,x6,x8,0.0179397110641002,0.0010822869383259,34
+friedman,cv_mlp,6,9,x6,x9,0.0168907477334141,0.0011935679711679,42
+friedman,cv_mlp,7,8,x7,x8,0.0168340990319847,0.0008110312404918,43
+friedman,cv_mlp,7,9,x7,x9,0.0168234717100858,0.0007950607379664,44
+friedman,cv_mlp,8,9,x8,x9,0.0165944586321711,0.0006776388157416,45
+friedman,cv_pure,0,1,x0,x1,0.3698943781852722,0.0031348583163673,1
+friedman,cv_pure,0,2,x0,x2,0.0130020866915583,0.001860587055398,3
+friedman,cv_pure,0,3,x0,x3,0.010220091883093,0.0016785593258302,5
+friedman,cv_pure,0,4,x0,x4,0.0078440197929739,0.0015869348641733,8
+friedman,cv_pure,0,5,x0,x5,0.0061788051761686,0.0012849457209085,15
+friedman,cv_pure,0,6,x0,x6,0.0064150562230497,0.0019577479387338,11
+friedman,cv_pure,0,7,x0,x7,0.0060514042899012,0.0014685325309974,18
+friedman,cv_pure,0,8,x0,x8,0.006218627244234,0.0010753541492885,14
+friedman,cv_pure,0,9,x0,x9,0.0058174153976141,0.0016038542646026,20
+friedman,cv_pure,1,2,x1,x2,0.0134805854037403,0.0022656798197067,2
+friedman,cv_pure,1,3,x1,x3,0.0103404143266379,0.001772232999832,4
+friedman,cv_pure,1,4,x1,x4,0.0078544255346059,0.0017689798192856,7
+friedman,cv_pure,1,5,x1,x5,0.0062534609064459,0.0013182377400911,13
+friedman,cv_pure,1,6,x1,x6,0.0061738275550305,0.0016259819160924,16
+friedman,cv_pure,1,7,x1,x7,0.0060739369317888,0.0011810680970999,17
+friedman,cv_pure,1,8,x1,x8,0.0063124937564134,0.0012698243988782,12
+friedman,cv_pure,1,9,x1,x9,0.0059527815226464,0.0016450163506209,19
+friedman,cv_pure,2,3,x2,x3,0.0097819650918244,0.0019539728723553,6
+friedman,cv_pure,2,4,x2,x4,0.0077351021766662,0.001336102384191,9
+friedman,cv_pure,2,5,x2,x5,0.0054744034167378,0.0013206435005854,24
+friedman,cv_pure,2,6,x2,x6,0.0056589612551033,0.0014570430154254,22
+friedman,cv_pure,2,7,x2,x7,0.0055620550643652,0.0014578372704467,23
+friedman,cv_pure,2,8,x2,x8,0.0056699198111891,0.0012932245747905,21
+friedman,cv_pure,2,9,x2,x9,0.0051225040294229,0.0014832203429793,25
+friedman,cv_pure,3,4,x3,x4,0.0065204638428985,0.0016493916982361,10
+friedman,cv_pure,3,5,x3,x5,0.0046509483549743,0.0012844518417427,26
+friedman,cv_pure,3,6,x3,x6,0.0044883052259683,0.001450798921857,28
+friedman,cv_pure,3,7,x3,x7,0.0043578813783824,0.0014879185163543,29
+friedman,cv_pure,3,8,x3,x8,0.0045487598422914,0.0013967582765109,27
+friedman,cv_pure,3,9,x3,x9,0.0042693393677472,0.0012267027925465,30
+friedman,cv_pure,4,5,x4,x5,0.0036222091130911,0.0010909182967561,31
+friedman,cv_pure,4,6,x4,x6,0.0035407241713255,0.0011925278873779,32
+friedman,cv_pure,4,7,x4,x7,0.0034855340188368,0.001134862915835,34
+friedman,cv_pure,4,8,x4,x8,0.0035162525437771,0.0010812503639429,33
+friedman,cv_pure,4,9,x4,x9,0.0032005198765545,0.0009382854973232,35
+friedman,cv_pure,5,6,x5,x6,0.0028289159853011,0.0010132881627517,41
+friedman,cv_pure,5,7,x5,x7,0.0028737365733831,0.0010282774099161,39
+friedman,cv_pure,5,8,x5,x8,0.0029480404406785,0.0012243960598535,36
+friedman,cv_pure,5,9,x5,x9,0.0027694051945581,0.0010735285117557,42
+friedman,cv_pure,6,7,x6,x7,0.0029446265287696,0.0012577952848545,37
+friedman,cv_pure,6,8,x6,x8,0.0028443112550302,0.0011113284476005,40
+friedman,cv_pure,6,9,x6,x9,0.0025560775399207,0.0009850998807883,45
+friedman,cv_pure,7,8,x7,x8,0.0029210996162145,0.0011671401073612,38
+friedman,cv_pure,7,9,x7,x9,0.002562783085741,0.0010924627651848,44
+friedman,cv_pure,8,9,x8,x9,0.0026271794270723,0.0008253546772661,43
+friedman,mlp,0,1,x0,x1,0.364794659614563,0.0008251894141842,1
+friedman,mlp,0,2,x0,x2,0.0271555072814225,0.0020650498361958,3
+friedman,mlp,0,3,x0,x3,0.0259561504423617,0.0020151914985561,4
+friedman,mlp,0,4,x0,x4,0.0223451095819472,0.0011417835202311,7
+friedman,mlp,0,5,x0,x5,0.0200471490249037,0.0016262891955849,12
+friedman,mlp,0,6,x0,x6,0.0187517265975474,0.0022914366993661,24
+friedman,mlp,0,7,x0,x7,0.0193994225561618,0.001795551213126,17
+friedman,mlp,0,8,x0,x8,0.0192961693555116,0.0015058233729263,20
+friedman,mlp,0,9,x0,x9,0.0193694385886191,0.0008847289031701,19
+friedman,mlp,1,2,x1,x2,0.0273112916201352,0.002005202624752,2
+friedman,mlp,1,3,x1,x3,0.0256963572651147,0.001969734329324,5
+friedman,mlp,1,4,x1,x4,0.0223393189162015,0.0023971717450526,8
+friedman,mlp,1,5,x1,x5,0.0205407847464084,0.0019237851060559,11
+friedman,mlp,1,6,x1,x6,0.0193920876085757,0.0022081582869684,18
+friedman,mlp,1,7,x1,x7,0.0198317144066094,0.0020212218697749,13
+friedman,mlp,1,8,x1,x8,0.0195267868041991,0.001097647293713,14
+friedman,mlp,1,9,x1,x9,0.0190692078322171,0.0009207269931118,21
+friedman,mlp,2,3,x2,x3,0.0247148553282022,0.0023693137197984,6
+friedman,mlp,2,4,x2,x4,0.0213553397357463,0.0018768896163428,9
+friedman,mlp,2,5,x2,x5,0.0194173259660601,0.0018814493921037,16
+friedman,mlp,2,6,x2,x6,0.018490954786539,0.0023093607618088,25
+friedman,mlp,2,7,x2,x7,0.0194922298192977,0.0022984478767076,15
+friedman,mlp,2,8,x2,x8,0.0188161921501159,0.0018128870154312,22
+friedman,mlp,2,9,x2,x9,0.0187573535367846,0.0015067403030147,23
+friedman,mlp,3,4,x3,x4,0.0205543488264083,0.0016044943609283,10
+friedman,mlp,3,5,x3,x5,0.0177002139016985,0.0019774132537287,27
+friedman,mlp,3,6,x3,x6,0.0175889716669916,0.0022020144840526,28
+friedman,mlp,3,7,x3,x7,0.0181642463058232,0.002605368212578,26
+friedman,mlp,3,8,x3,x8,0.0169756714254617,0.0014336702299614,30
+friedman,mlp,3,9,x3,x9,0.0172617830336093,0.0006737475389629,29
+friedman,mlp,4,5,x4,x5,0.0164283810555934,0.0014550248014161,31
+friedman,mlp,4,6,x4,x6,0.0147978799045085,0.0017464984899151,35
+friedman,mlp,4,7,x4,x7,0.0154726883023976,0.0017300442025942,33
+friedman,mlp,4,8,x4,x8,0.0156525230407714,0.001290186483928,32
+friedman,mlp,4,9,x4,x9,0.0149453358352183,0.0013282865673745,34
+friedman,mlp,5,6,x5,x6,0.0144991724938153,0.0018392550321965,38
+friedman,mlp,5,7,x5,x7,0.0146611867845058,0.0020509711250345,36
+friedman,mlp,5,8,x5,x8,0.0145375512912868,0.0014457026975615,37
+friedman,mlp,5,9,x5,x9,0.0144269144907593,0.0009862872591383,39
+friedman,mlp,6,7,x6,x7,0.0144251814112066,0.0025113683029447,40
+friedman,mlp,6,8,x6,x8,0.0139990638568996,0.0019243577695617,43
+friedman,mlp,6,9,x6,x9,0.0136243158578872,0.0019617536304993,45
+friedman,mlp,7,8,x7,x8,0.0142962916195392,0.0015700144233657,41
+friedman,mlp,7,9,x7,x9,0.0140596543624996,0.0019378319675319,42
+friedman,mlp,8,9,x8,x9,0.0136321552097797,0.001206847103133,44
+friedman,resmlp,0,1,x0,x1,0.3641166281700134,0.0018704788798928,1
+friedman,resmlp,0,2,x0,x2,0.026318064033985,0.0012555963328952,3
+friedman,resmlp,0,3,x0,x3,0.024394160285592,0.0009362630973013,4
+friedman,resmlp,0,4,x0,x4,0.0208486033976077,0.0014467900620921,8
+friedman,resmlp,0,5,x0,x5,0.019423500560224,0.0008389163058656,13
+friedman,resmlp,0,6,x0,x6,0.0186452417820691,0.0014525506388954,22
+friedman,resmlp,0,7,x0,x7,0.0199100249633192,0.0025038067412796,12
+friedman,resmlp,0,8,x0,x8,0.0191857130080461,0.0015985571143869,14
+friedman,resmlp,0,9,x0,x9,0.0190201459825038,0.0015280349754978,16
+friedman,resmlp,1,2,x1,x2,0.0264912454038857,0.0013113297659754,2
+friedman,resmlp,1,3,x1,x3,0.024159346744418,0.0009168490008826,5
+friedman,resmlp,1,4,x1,x4,0.021248792335391,0.0013833882504895,7
+friedman,resmlp,1,5,x1,x5,0.0199583705514668,0.001101592018174,11
+friedman,resmlp,1,6,x1,x6,0.0189233073592185,0.0015402775831531,19
+friedman,resmlp,1,7,x1,x7,0.0205455757677554,0.0023283792939187,9
+friedman,resmlp,1,8,x1,x8,0.0190276218950747,0.0014461729334911,15
+friedman,resmlp,1,9,x1,x9,0.0188674978911876,0.0014365693566862,20
+friedman,resmlp,2,3,x2,x3,0.0233689226210116,0.0010636645194701,6
+friedman,resmlp,2,4,x2,x4,0.0200327515602111,0.0012872234711352,10
+friedman,resmlp,2,5,x2,x5,0.0185833720862864,0.0014151050951069,23
+friedman,resmlp,2,6,x2,x6,0.0179257184267043,0.0017427457038252,25
+friedman,resmlp,2,7,x2,x7,0.0189488949626683,0.0021961093884111,18
+friedman,resmlp,2,8,x2,x8,0.0187763308733701,0.0016179006198005,21
+friedman,resmlp,2,9,x2,x9,0.0180402237176894,0.0015386360239213,24
+friedman,resmlp,3,4,x3,x4,0.0189815680682658,0.0012876508979042,17
+friedman,resmlp,3,5,x3,x5,0.0173240433260797,0.001100500736378,27
+friedman,resmlp,3,6,x3,x6,0.0166735614836215,0.0013654379819888,30
+friedman,resmlp,3,7,x3,x7,0.0178180609270929,0.0019647319054159,26
+friedman,resmlp,3,8,x3,x8,0.0167654843255877,0.0010408827414877,29
+friedman,resmlp,3,9,x3,x9,0.0171613946557044,0.0010692360244991,28
+friedman,resmlp,4,5,x4,x5,0.0156821120902895,0.0012878345631369,32
+friedman,resmlp,4,6,x4,x6,0.0147315794602036,0.0012391118345826,35
+friedman,resmlp,4,7,x4,x7,0.0161164211481809,0.002201218591262,31
+friedman,resmlp,4,8,x4,x8,0.0153948437795042,0.0015924351674806,33
+friedman,resmlp,4,9,x4,x9,0.0147114307060837,0.0016307481307914,36
+friedman,resmlp,5,6,x5,x6,0.0141823772341012,0.0009237251164764,41
+friedman,resmlp,5,7,x5,x7,0.0146377253532409,0.0017126892141979,37
+friedman,resmlp,5,8,x5,x8,0.0147565430775284,0.0012847790571853,34
+friedman,resmlp,5,9,x5,x9,0.0139657830819487,0.0010979091477353,42
+friedman,resmlp,6,7,x6,x7,0.0142746200412511,0.0022857627794167,40
+friedman,resmlp,6,8,x6,x8,0.0138196776807307,0.0012787099238957,43
+friedman,resmlp,6,9,x6,x9,0.0132631166651844,0.0015414084469639,45
+friedman,resmlp,7,8,x7,x8,0.0144923757016658,0.0014374351399485,38
+friedman,resmlp,7,9,x7,x9,0.0143763318657874,0.0019912884292852,39
+friedman,resmlp,8,9,x8,x9,0.0137564115598797,0.0008424321324179,44
+friedman,rv_pure,0,1,x0,x1,0.3667855989933014,0.0030402851499276,1
+friedman,rv_pure,0,2,x0,x2,0.0262742141634225,0.001928477677099,3
+friedman,rv_pure,0,3,x0,x3,0.0249591688811778,0.0011183344813959,4
+friedman,rv_pure,0,4,x0,x4,0.0207134488224982,0.001228749854369,8
+friedman,rv_pure,0,5,x0,x5,0.0199564669281243,0.0015153362410603,10
+friedman,rv_pure,0,6,x0,x6,0.01858177408576,0.0020568436047147,22
+friedman,rv_pure,0,7,x0,x7,0.0193382614850997,0.0015786644221599,14
+friedman,rv_pure,0,8,x0,x8,0.019334091618657,0.0017381012295517,15
+friedman,rv_pure,0,9,x0,x9,0.0190723933279513,0.0013868088991818,19
+friedman,rv_pure,1,2,x1,x2,0.026865182891488,0.0017598465720995,2
+friedman,rv_pure,1,3,x1,x3,0.0241731204092502,0.0015429953744607,5
+friedman,rv_pure,1,4,x1,x4,0.0213406872749328,0.0009868066539525,7
+friedman,rv_pure,1,5,x1,x5,0.0198366153985261,0.0015018787272265,11
+friedman,rv_pure,1,6,x1,x6,0.0190839963406323,0.0018353606725528,18
+friedman,rv_pure,1,7,x1,x7,0.0194756499677896,0.0019218565235951,13
+friedman,rv_pure,1,8,x1,x8,0.0192490865290164,0.0015924199248604,16
+friedman,rv_pure,1,9,x1,x9,0.0186538241803645,0.0009291548309076,21
+friedman,rv_pure,2,3,x2,x3,0.0237414893507956,0.0015595679296326,6
+friedman,rv_pure,2,4,x2,x4,0.0205968622863292,0.0015621795376281,9
+friedman,rv_pure,2,5,x2,x5,0.0189864707365631,0.0018941237776264,20
+friedman,rv_pure,2,6,x2,x6,0.0181123029068111,0.0019125528879784,24
+friedman,rv_pure,2,7,x2,x7,0.0191688265651463,0.0024693415323781,17
+friedman,rv_pure,2,8,x2,x8,0.0182600931823253,0.0020217659563598,23
+friedman,rv_pure,2,9,x2,x9,0.0179463152587413,0.001435646643723,25
+friedman,rv_pure,3,4,x3,x4,0.0196117192506789,0.0006016273930262,12
+friedman,rv_pure,3,5,x3,x5,0.0177566155791282,0.0018371644904003,26
+friedman,rv_pure,3,6,x3,x6,0.0171464752405881,0.0019595075117769,28
+friedman,rv_pure,3,7,x3,x7,0.0175189932808279,0.0016746304197171,27
+friedman,rv_pure,3,8,x3,x8,0.0169902256131171,0.0017177717553343,29
+friedman,rv_pure,3,9,x3,x9,0.0168830071389674,0.0010957521382387,30
+friedman,rv_pure,4,5,x4,x5,0.0158134899288415,0.0011091452592465,31
+friedman,rv_pure,4,6,x4,x6,0.014721749536693,0.0016406181277585,34
+friedman,rv_pure,4,7,x4,x7,0.0155055759102105,0.0018832913095807,33
+friedman,rv_pure,4,8,x4,x8,0.0155646526068448,0.0017520371268283,32
+friedman,rv_pure,4,9,x4,x9,0.0143779378011822,0.0008370428518252,39
+friedman,rv_pure,5,6,x5,x6,0.0141832304000853,0.0015693420988756,41
+friedman,rv_pure,5,7,x5,x7,0.0147197874262928,0.001700707600531,35
+friedman,rv_pure,5,8,x5,x8,0.0144883235916494,0.0013445250532577,36
+friedman,rv_pure,5,9,x5,x9,0.0144028774648904,0.0010344613209482,38
+friedman,rv_pure,6,7,x6,x7,0.0144414524734019,0.0021208197186139,37
+friedman,rv_pure,6,8,x6,x8,0.0139679477363824,0.0017778070872387,42
+friedman,rv_pure,6,9,x6,x9,0.0132679066434502,0.001484765240729,45
+friedman,rv_pure,7,8,x7,x8,0.0142332872375845,0.0014887167089285,40
+friedman,rv_pure,7,9,x7,x9,0.0137081549316644,0.0011619115058764,43
+friedman,rv_pure,8,9,x8,x9,0.0136994424834846,0.0012742610785689,44

@@ -1,0 +1,91 @@
+{
+  "feature_names": [
+    "cylinders",
+    "displacement",
+    "horsepower",
+    "weight",
+    "acceleration",
+    "model_year",
+    "origin_1",
+    "origin_2",
+    "origin_3"
+  ],
+  "feature_groups": {
+    "cylinders": [
+      0
+    ],
+    "displacement": [
+      1
+    ],
+    "horsepower": [
+      2
+    ],
+    "weight": [
+      3
+    ],
+    "acceleration": [
+      4
+    ],
+    "model_year": [
+      5
+    ],
+    "origin_1": [
+      6
+    ],
+    "origin_2": [
+      7
+    ],
+    "origin_3": [
+      8
+    ]
+  },
+  "feature_group_roles": {
+    "cylinders": "ordinary",
+    "displacement": "ordinary",
+    "horsepower": "ordinary",
+    "weight": "ordinary",
+    "acceleration": "ordinary",
+    "model_year": "ordinary",
+    "origin_1": "ordinary",
+    "origin_2": "ordinary",
+    "origin_3": "ordinary"
+  },
+  "target_name": "mpg",
+  "x_scaler_mean": [
+    5.4963503649635035,
+    195.50547445255475,
+    104.74087591240875,
+    2995.2445255474454,
+    15.537956204379554,
+    76.0036496350365,
+    0.635036496350365,
+    0.16423357664233576,
+    0.20072992700729927
+  ],
+  "x_scaler_scale": [
+    1.6877579287769595,
+    103.11562926747543,
+    37.903671710795855,
+    844.075675977338,
+    2.780015527627204,
+    3.668268128112528,
+    0.48141992548441276,
+    0.3704873937742026,
+    0.40054640606419534
+  ],
+  "y_scaler_mean": [
+    23.168978102189783
+  ],
+  "y_scaler_scale": [
+    7.757818357699111
+  ],
+  "split_indices": "protocol/splits/22f8c3afa4dbb1919fbad06957e353d34c1914b76d91d10ac02d3d2b1f6e3afc.npz",
+  "split_sha256": "fe9800eba507bd89e34cf77636da61b567ac91fab014013f886b68c82a1e6647",
+  "partition_sizes": {
+    "train": 274,
+    "validation": 58,
+    "test": 60
+  },
+  "true_pairs": [],
+  "interaction_groups": []
+}
