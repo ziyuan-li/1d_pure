@@ -1,0 +1,96 @@
+{
+  "status": "passed",
+  "manuscript": "revision_20261031/1d_pure.tex",
+  "manuscript_sha256": "7973f6e58536d8efc282c3af5e77b062f8b48a52dc558b6608682b9c7697da6a",
+  "run_configurations_checked": 1215,
+  "default_parkinsons_partition_sizes": [
+    3573,
+    1221,
+    1081
+  ],
+  "paper_claims": {
+    "cross_split_winners": {
+      "auto_mpg": "cv_pure",
+      "california": "cv_pure",
+      "concrete": "resmlp",
+      "energy": "cv_pure",
+      "friedman": "cv_pure",
+      "yacht": "mlp"
+    },
+    "higher_order_rmse_reduction_percent": 42.09031033100974,
+    "cv_context_ablation_positive_seed_pairs": 9,
+    "learning_aulc_winners": {
+      "concrete": "resmlp",
+      "friedman": "cv_pure",
+      "parkinsons_telemonitoring": "cv_pure"
+    },
+    "noise_auc_winners": {
+      "scientific": "cv_pure",
+      "context": "cv_pure"
+    }
+  },
+  "evaluations": [
+    {
+      "run": "primary/friedman/cv_pure/split_0/f1000/none/seed_0",
+      "noise": true,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "primary/concrete/rv_pure/split_0/f1000/none/seed_2",
+      "noise": true,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "primary/california/mlp/split_0/f1000/none/seed_0",
+      "noise": true,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "primary/bike_sharing/cv_pure/window_2/f1000/none/seed_0",
+      "noise": true,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "primary/parkinsons_telemonitoring/cv_pure/window_2/f1000/none/seed_0",
+      "noise": true,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "primary/synthetic_higher_order/cv_pure/split_0/f1000/none/seed_0",
+      "noise": false,
+      "interactions": true,
+      "record_comparison": "passed"
+    },
+    {
+      "run": "shortcut_ablation/concrete/cv_pu/split_0/f1000/none/seed_0",
+      "noise": true,
+      "interactions": false,
+      "record_comparison": "passed"
+    }
+  ],
+  "full_training_reproductions": [
+    {
+      "run": "learning/friedman/rv_pure/split_0/f0050/none/seed_0",
+      "epochs_run": 162,
+      "all_tensors_exact": true,
+      "test_rmse": 1.020814928186193
+    },
+    {
+      "run": "shortcut_ablation/concrete/cv_pu/split_0/f1000/none/seed_0",
+      "epochs_run": 73,
+      "all_tensors_exact": true,
+      "test_rmse": 6.066493826403061
+    },
+    {
+      "run": "ablation/bike_sharing/cv_pure/window_2/f1000/bike_no_weather/seed_0",
+      "epochs_run": 30,
+      "all_tensors_exact": true,
+      "test_rmse": 103.21104187622717
+    }
+  ]
+}

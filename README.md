@@ -48,6 +48,9 @@ python -m pure_resmlp.paper figures
 another listed configuration with `--run-id ID`. Training starts from scratch
 using the recorded settings. `--smoke-epochs 2` runs a short training check.
 Outputs go to `generated/`; released weights and records are preserved.
+Evaluation uses released weights by default. Pass `--checkpoint PATH` to
+`evaluate`, `demo`, or `benchmark` to use a newly trained weight file with the
+same `--run-id`; the evaluation records its actual checkpoint hash.
 Tables and figures rebuild from saved results without datasets or a GPU.
 `summarize` recomputes statistics from per-seed records; use
 `python -m pure_resmlp.tables --report-dir generated/reports` to use those summaries.

@@ -56,7 +56,8 @@
     "source": "pure_resmlp/data/datasets.py",
     "source_sha256": "25edd6177b7315d7817f6dd3dd27fe70edb8d550b992fe2f67a5387d23766606",
     "release": "pure_resmlp/data/datasets.py",
-    "release_sha256": "e7c65734f0d527547b5afdbed55334abbb8214a0bd5cb7a3153868f1aacae9a7"
+    "release_sha256": "417bc6dbe3b59c64fb77d757c854ce0fac7a9eff0cd3ef3dbef3494bee93f757",
+    "adaptation": "Enabled strict_time_groups by default for direct Parkinsons loader calls; all recorded manuscript runs already selected this setting explicitly."
   },
   {
     "source": "pure_resmlp/data/synthetic.py",

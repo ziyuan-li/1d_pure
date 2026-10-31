@@ -54,10 +54,37 @@
   "initialization_and_rng_equivalent_cases": 255,
   "python_comments": 0,
   "python_docstrings": 0,
-  "isolated_archive_unit_tests_passed": 5,
+  "isolated_archive_unit_tests_passed": 10,
   "isolated_archive_table_generation": "passed",
   "source_cleanups": [
     "Renamed legacy MLP4Layer class names to MLPRegressor / ComplexMLPRegressor.",
     "Removed unused zero-initialization switches from PU blocks."
+  ],
+  "paper_protocol_audit": "protocol/paper_audit.json",
+  "additional_full_training_reproductions": [
+    {
+      "run": "learning/friedman/rv_pure/split_0/f0050/none/seed_0",
+      "epochs_run": 162,
+      "all_tensors_exact": true,
+      "test_rmse": 1.020814928186193
+    },
+    {
+      "run": "shortcut_ablation/concrete/cv_pu/split_0/f1000/none/seed_0",
+      "epochs_run": 73,
+      "all_tensors_exact": true,
+      "test_rmse": 6.066493826403061
+    },
+    {
+      "run": "ablation/bike_sharing/cv_pure/window_2/f1000/bike_no_weather/seed_0",
+      "epochs_run": 30,
+      "all_tensors_exact": true,
+      "test_rmse": 103.21104187622717
+    }
+  ],
+  "evaluation_record_reproductions": 7,
+  "publication_interface_fixes": [
+    "Enable equal-timestamp grouping by default in the Parkinsons loader, matching all recorded fits.",
+    "Allow evaluation, prediction and timing of an explicitly selected newly trained checkpoint.",
+    "Export run identifiers, actual checkpoint hashes and sampled indices with evaluation records."
   ]
 }

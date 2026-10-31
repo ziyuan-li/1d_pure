@@ -39,6 +39,7 @@ to the released implementation. Paths below are relative to the repository root.
   using training rows only. Bike uses chronological 60/20/20 partitions;
   Parkinsons uses within-subject chronological groups without splitting equal
   timestamps. Context encodings and excluded target-related columns are defined here.
+  The Parkinsons loader also enables timestamp grouping by default when called directly.
 - Scientific cross-split performance uses split seeds 0–4 × training seeds 0–4.
   Fixed random partitions use split seed 0. Synthetic recovery and Bike context
   ablations use training seeds 0–2; other experiments use 0–4.
@@ -51,6 +52,12 @@ Exact per-run settings are in [protocol/runs.json](protocol/runs.json), seed rol
 in [protocol/protocol.json](protocol/protocol.json), and saved scaler statistics
 and partition indices in `protocol/preprocessing/` and `protocol/splits/`.
 `window_2` in context run IDs denotes the final 60/20/20 partition.
+Friedman record labels `x0`–`x9` use zero-based indices; the manuscript and
+figures display the same columns as `x1`–`x10`.
+
+`evaluate` writes identified per-run noise/pair/recovery records and sampled
+row indices. For a new fit, supply `--checkpoint PATH` with its `--run-id`;
+without this option the released checkpoint is evaluated.
 
 ## Tables and figures
 
@@ -83,5 +90,7 @@ The release includes 1,215 distinct weight dictionaries, with repeated uses
 across analyses sharing the same checkpoint. Each run records its released
 checkpoint hash, original checkpoint hash, preprocessing reference and metrics.
 [protocol/verification.json](protocol/verification.json) records the release
-checks; `SHA256SUMS` covers the distributed files. Only generated synthetic
+checks. [protocol/paper_audit.json](protocol/paper_audit.json) records the
+manuscript hash, protocol checks, evaluation comparisons and full-training
+reproductions. `SHA256SUMS` covers the distributed files. Only generated synthetic
 observations are included; see the [data guide](data/README.md) for external data.

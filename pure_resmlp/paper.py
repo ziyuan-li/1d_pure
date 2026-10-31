@@ -8,6 +8,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
+from itertools import combinations
 from types import SimpleNamespace
 
 import numpy as np
@@ -71,12 +72,22 @@ def make_model(run):
     return model
 
 
-def load_model(run, device='cpu'):
-    path = PROJECT_ROOT / run['checkpoint']
+def checkpoint_path(run, checkpoint=None):
+    return PROJECT_ROOT / run['checkpoint'] if checkpoint is None else Path(checkpoint).resolve()
+
+
+def load_model(run, device='cpu', checkpoint=None):
+    path = checkpoint_path(run, checkpoint)
     if not path.exists():
         raise FileNotFoundError(f'{path}: extract the checkpoint archive at the repository root.')
-    if sha256(path) != run['checkpoint_sha256']:
+    if checkpoint is None and sha256(path) != run['checkpoint_sha256']:
         raise ValueError(f'Checkpoint checksum mismatch: {run["id"]}')
+    if checkpoint is not None and (path.parent / 'config.json').exists():
+        saved = read_json(path.parent / 'config.json')
+        if saved.get('source_run_id', saved.get('id')) != run['id']:
+            raise ValueError('The checkpoint configuration does not match --run-id.')
+        if saved.get('checkpoint') == path.name and saved.get('checkpoint_sha256') != sha256(path):
+            raise ValueError('The checkpoint checksum does not match its saved configuration.')
     model = make_model(run)
     state = torch.load(path, map_location='cpu', weights_only=True)
     model.load_state_dict(state, strict=True)
@@ -144,7 +155,7 @@ def generate_synthetic():
     print('Generated three synthetic datasets in', folder)
 
 
-def demo(run, device):
+def demo(run, device, checkpoint=None):
     if run['dataset'] not in SYNTHETIC:
         raise ValueError('The demo uses only the three included synthetic datasets.')
     path = PROJECT_ROOT / 'data/synthetic' / f'{run["dataset"]}.npz'
@@ -152,10 +163,11 @@ def demo(run, device):
         metadata = preprocessing(run)
         with np.load(PROJECT_ROOT / metadata['split_indices'], allow_pickle=False) as split:
             indices = split['test']
-        prediction = predict_encoded(run, data['X'][indices], device)
+        prediction = predict_encoded(run, data['X'][indices], device, load_model(run, device, checkpoint))
         rmse = float(np.sqrt(np.mean((prediction-data['y'][indices])**2)))
         expected = run['metrics']['test_rmse']
-        np.testing.assert_allclose(rmse, expected, rtol=5e-4, atol=5e-5)
+        if checkpoint is None:
+            np.testing.assert_allclose(rmse, expected, rtol=5e-4, atol=5e-5)
         result = dict(run=run['id'], device=device, test_rmse=rmse, recorded_rmse=expected,
                       first_predictions=prediction[:5].tolist(), targets=data['y'][indices][:5].tolist())
         print(json.dumps(result, indent=2))
@@ -188,20 +200,26 @@ def verify(device):
     print(json.dumps(dict(checkpoints=len(all_runs), preprocessing_records=len(checked_preprocessors), status='passed')))
 
 
-def evaluate(run, device, output, *, noise=False, interactions=False):
+def evaluate(run, device, output, *, noise=False, interactions=False, checkpoint=None):
     from pure_resmlp.evaluation.noise import continuous_ordinary_columns, add_gaussian_feature_noise
     from pure_resmlp.evaluation.finite_difference_interactions import finite_difference_interactions, interaction_recovery_metrics
     data = prepare(run)
-    model = load_model(run, device)
+    model = load_model(run, device, checkpoint)
+    common = dict(dataset=run['dataset'], model=run['model'], training_seed=run['seed'])
     def predict(X, batch=512):
         values, _ = transform_input_matrix(data, run['model'], X, tuple(run['excluded_groups']))
         return predict_torch(model, values, device=torch.device(device), batch_size=batch,
                              complex_input=run['model'].startswith('cv_'))
     _, metrics = regression_metrics(data, predict(data.X_test, run['batch_size']))
-    for key in ('test_rmse', 'test_mae', 'test_r2'):
-        np.testing.assert_allclose(metrics[key], run['metrics'][key], rtol=5e-4, atol=5e-5)
+    if checkpoint is None:
+        for key in ('test_rmse', 'test_mae', 'test_r2'):
+            np.testing.assert_allclose(metrics[key], run['metrics'][key], rtol=5e-4, atol=5e-5)
     folder = output / run['id']
     write_json(folder / 'metrics.json', metrics)
+    write_json(folder / 'evaluation.json', dict(run_id=run['id'], **common,
+        checkpoint_sha256=sha256(checkpoint_path(run, checkpoint)),
+        checkpoint_source='released' if checkpoint is None else 'custom',
+        preprocessing=run['preprocessing'], split_seed=run['split_seed'], fraction=run['fraction']))
     if noise:
         rows = []
         columns = continuous_ordinary_columns(data)
@@ -209,19 +227,38 @@ def evaluate(run, device, output, *, noise=False, interactions=False):
             for seed in ((-1,) if sigma == 0 else range(5)):
                 X = add_gaussian_feature_noise(data.X_test, columns, sigma, max(0, seed))
                 _, scores = regression_metrics(data, predict(X, run['batch_size'] if sigma == 0 and run['kind']=='shortcut_ablation' else 512))
-                rows.append(dict(noise_std=sigma, corruption_seed=seed, **scores))
+                rows.append(dict(**common, experiment='protocol_v3', noise_std=sigma,
+                    corruption_seed=seed, perturbed_features=len(columns), **scores))
         pd.DataFrame(rows).to_csv(folder / 'noise.csv', index=False)
     if interactions:
         context = run['dataset'] in ('bike_sharing', 'parkinsons_telemonitoring')
-        rows, recovery = [], []
+        rows, recovery, context_rows, sampling = [], [], [], []
         for seed in ((0,) if context else range(5)):
             score = finite_difference_interactions(predict, data.X_test, data.X_train, data.feature_groups, n_samples=256, seed=seed)
-            for a, b, strength in score.ranked_pairs():
-                rows.append(dict(sampling_seed=seed, feature_i=a, feature_j=b, strength=strength))
+            count = min(256, len(data.X_test))
+            rng = np.random.default_rng(seed)
+            test = rng.choice(len(data.X_test), size=count, replace=False)
+            refs = rng.choice(len(data.X_train), size=count, replace=True)
+            sampling.append(dict(sampling_seed=seed, test_indices=data.test_indices[test].tolist(),
+                                 reference_indices=data.train_indices[refs].tolist()))
+            for i, j in combinations(range(len(score.group_names)), 2):
+                a, b = score.group_names[i], score.group_names[j]
+                strength = float(score.matrix[i, j])
+                rows.append(dict(**common, sampling_seed=seed, n_samples=count, i=i, j=j,
+                                 feature_i=a, feature_j=b, strength=strength))
+                if context and data.feature_group_roles[a] != data.feature_group_roles[b]:
+                    ordinary, ctx = (a,b) if data.feature_group_roles[a] == 'ordinary' else (b,a)
+                    context_rows.append(dict(**common, sampling_seed=seed, ordinary_feature=ordinary,
+                                             context_feature=ctx, interaction_strength=strength))
             truth = preprocessing(run)['true_pairs']
             if truth:
-                recovery.append(dict(sampling_seed=seed, **interaction_recovery_metrics(score, truth)))
-        pd.DataFrame(rows).to_csv(folder / 'interactions.csv', index=False)
+                recovery.append(dict(**common, sampling_seed=seed, **interaction_recovery_metrics(score, truth)))
+        frame = pd.DataFrame(rows)
+        frame.to_csv(folder / 'pairs.csv', index=False)
+        frame.to_csv(folder / 'interactions.csv', index=False)
+        write_json(folder / 'sampling_indices.json', sampling)
+        if context_rows:
+            pd.DataFrame(context_rows).to_csv(folder / 'context.csv', index=False)
         if recovery:
             pd.DataFrame(recovery).to_csv(folder / 'recovery.csv', index=False)
     print(json.dumps(dict(run=run['id'], **metrics), indent=2))
@@ -250,9 +287,9 @@ def train(run, device, output, smoke_epochs=None):
     print(json.dumps(dict(run=run['id'], smoke=bool(smoke_epochs), **metrics, **info), indent=2))
 
 
-def benchmark(run, device, output):
+def benchmark(run, device, output, checkpoint=None):
     data = prepare(run)
-    model = load_model(run, device)
+    model = load_model(run, device, checkpoint)
     target = torch.device(device)
     def synchronize():
         if target.type == 'cuda':
@@ -300,7 +337,10 @@ def main():
     parser.add_argument('--smoke-epochs', type=int)
     parser.add_argument('--noise', action='store_true')
     parser.add_argument('--interactions', action='store_true')
+    parser.add_argument('--checkpoint', type=Path)
     args = parser.parse_args()
+    if args.checkpoint is not None and args.command not in ('demo', 'evaluate', 'benchmark'):
+        parser.error('--checkpoint applies to demo, evaluate, and benchmark.')
     configure()
     if args.command == 'list':
         for r in runs():
@@ -313,11 +353,11 @@ def main():
     elif args.command == 'figures':
         figures(args.output_dir / 'figures')
     elif args.command == 'demo':
-        demo(get_run(args.run_id), args.device)
+        demo(get_run(args.run_id), args.device, args.checkpoint)
     elif args.command == 'evaluate':
-        evaluate(get_run(args.run_id), args.device, args.output_dir / 'evaluations', noise=args.noise, interactions=args.interactions)
+        evaluate(get_run(args.run_id), args.device, args.output_dir / 'evaluations', noise=args.noise, interactions=args.interactions, checkpoint=args.checkpoint)
     elif args.command == 'benchmark':
-        benchmark(get_run(args.run_id), args.device, args.output_dir / 'latency')
+        benchmark(get_run(args.run_id), args.device, args.output_dir / 'latency', args.checkpoint)
     else:
         if args.smoke_epochs is not None and args.smoke_epochs < 1:
             parser.error('--smoke-epochs must be positive')

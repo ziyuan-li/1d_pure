@@ -245,7 +245,7 @@ def prepare_bike_sharing(*, window: tuple[float, float, float]=(0.6, 0.8, 1.0)) 
     y = frame['cnt'].to_numpy(dtype=np.float64)
     return _prepare_from_arrays(name='bike_sharing', X=X, y=y, feature_names=tuple(feature_names), target_name='cnt', indices=indices, feature_groups=feature_groups, feature_group_roles=roles, encoder=encoder)
 
-def prepare_parkinsons_telemonitoring(*, window: tuple[float, float, float]=(0.6, 0.8, 1.0), strict_time_groups: bool=False) -> PreparedData:
+def prepare_parkinsons_telemonitoring(*, window: tuple[float, float, float]=(0.6, 0.8, 1.0), strict_time_groups: bool=True) -> PreparedData:
     path = RAW_DIR / 'parkinsons_telemonitoring' / 'parkinsons_updrs.data'
     frame = pd.read_csv(path)
     if frame.shape != (5875, 22) or frame.isna().any().any():
