@@ -1,8 +1,8 @@
-# PURe
+# Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Networks
 
 PyTorch implementation of real- and complex-valued product-unit residual networks for nonlinear regression and feature-interaction analysis.
 
-Code for **Learning Nonlinear Interactions: Prediction and Interpretation with Product-Unit Residual Networks**, by Ziyuan Li, Uwe Jaekel, and Babette Dellen.
+Ziyuan Li, Uwe Jaekel, and Babette Dellen.
 
 The repository includes model architectures, baselines, pretrained checkpoints, experiment configurations, and analysis scripts.
 
